@@ -5,7 +5,7 @@ $(function(){
 
     var turn = 1;
     var moves_left = 1;
-    var contract_address = '0xD1d12310299F8Ab01c89BA3744409C09C58311A5';
+    var contract_address = '0x71CC907df3700D6654D2775AA8F42ad0EC22500a';
 
     var contractABI = [{"constant":false,"inputs":[],"name":"join_game","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint8"},{"name":"","type":"uint8"}],"name":"board","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[{"name":"x1","type":"uint8"},{"name":"y1","type":"uint8"},{"name":"x2","type":"uint8"},{"name":"y2","type":"uint8"}],"name":"make_move","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"turn","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[{"name":"x","type":"uint8"},{"name":"y","type":"uint8"}],"name":"make_first_move","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"board_size","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"players","outputs":[{"name":"","type":"address"}],"type":"function"},{"inputs":[],"type":"constructor"}]
     
