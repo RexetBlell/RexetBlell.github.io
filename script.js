@@ -23,7 +23,35 @@ $(function(){
 
     var my_moves = [];
 
+    var draw_my_moves = function() {
+        for (var i = 0; i < my_moves.length; i++) {
+            if (connectsix.board(my_moves[i].x, my_moves[i].y) != 0) {
+                my_moves = [];
+                break;
+            }
+        }
+        var color;
+        if (turn == 1) {
+            color = WGo.B;
+        } else {
+            color = WGo.W;
+        }
+        for (var i = 0; i < my_moves.length; i++) {
+            board.addObject({
+                x: my_moves[i].x,
+                y: my_moves[i].y,
+                c: color
+            });
+            board.addObject({
+                x: my_moves[i].x,
+                y: my_moves[i].y,
+                type: "CR"
+            });
+        }
+    }
+
     var refresh = function() {
+        turn = connectsix.turn();
         for (var x = 0; x < 19; x++) {
             for (var y = 0; y < 19; y++) {
                 var r = connectsix.board(x, y);
@@ -43,45 +71,34 @@ $(function(){
                 }
             }
         }
-        turn = connectsix.turn();
-        var color;
-        if (turn == 1) {
-            color = WGo.B;
-        } else {
-            color = WGo.W;
-        }
-        for (var i = 0; i < my_moves.length; i++) {
-            if (connectsix.board(my_moves[i].x, my_moves[i].y) != 0) {
-                my_moves = [];
-                break;
-            }
-            board.addObject({
-                x: my_moves[i].x,
-                y: my_moves[i].y,
-                c: color
-            });
-            board.addObject({
-                x: my_moves[i].x,
-                y: my_moves[i].y,
-                c: "CR"
-            });
-        }
+        draw_my_moves();
     }
 
     refresh();
 
     board.addEventListener("click", function(x, y) {
-        if (my_moves.length >= 2) {
+        if (my_moves.length >= 2
+                || (my_moves.length == 1 && my_moves[0].x == x && my_moves[0].y == y)
+                || connectsix.board(x, y) != 0) {
             my_moves = [];
         } else {
-            for (var i = 0; i < my_moves.length; i++) {
-                if (my_moves[i].x == x && my_moves[i].y == y) {
-                    my_moves = [];
-                    break;
-                }
-            }
             my_moves.push({x:x, y:y});
         }
         refresh();
     });
+
+    $("#btn_make_move").click(function(){
+        if (my_moves.length == 2) {
+            connectsix.make_move(my_moves[0].x, my_moves[0].y, my_moves[1].x, my_moves[1].y,
+                    {from: web3.eth.accounts[0]});
+        }
+    });
+
+    (function(){
+        // do some stuff
+        refresh();
+        setTimeout(arguments.callee, 4000);
+    })();
+
+
 });
