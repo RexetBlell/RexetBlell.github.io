@@ -19,14 +19,18 @@ contract ConnectSix {
       uint player_1_stake;
       // amount player 2 must send to join
       uint player_2_stake;
+      
+      // represents the last move played
+      uint8 x1;
+      uint8 y1;
+      uint8 x2;
+      uint8 y2;
   }
 
   event LogGameCreated(uint game_num);
   event LogGameStarted(uint game_num);
-  event LogVictory(uint game_num);
+  event LogVictory(uint game_num, uint8 winner);
   event LogMoveMade(uint game_num, uint8 x1, uint8 y1, uint8 x2, uint8 y2);
-
-  function ConnectSix() { }
 
   function new_game(uint _time_per_move, uint opponent_stake) {
     games.length++;
@@ -84,6 +88,10 @@ contract ConnectSix {
     single_move(game_num, x2, y2);
     g.turn = 3 - g.turn;
     g.deadline = now + g.time_per_move;
+    g.x1 = x1;
+    g.y1 = y1;
+    g.x2 = x2;
+    g.y2 = y2;
     LogMoveMade(game_num, x1, y1, x2, y2);
   }
 
@@ -107,7 +115,7 @@ contract ConnectSix {
     }
     g.winner = 3 - g.turn;
     pay_winner(game_num);
-    LogVictory(game_num);
+    LogVictory(game_num, g.winner);
   }
 
   function claim_victory(uint game_num, uint8 x, uint8 y, uint8 dir) {
@@ -123,8 +131,8 @@ contract ConnectSix {
     // 19 x 19 board are 0
     if (dir == 3) {
       // this is going diagonal (10:30pm)
-      for (uint8 i = 1; i < 6; i++) {
-        if (g.board[x - i*dx][y + i*dy] != g.board[x][y]) {
+      for (uint8 j = 1; j < 6; j++) {
+        if (g.board[x - j*dx][y + j*dy] != g.board[x][y]) {
           throw;
         }
       }
@@ -150,6 +158,6 @@ contract ConnectSix {
     }
     g.winner = g.board[x][y];
     pay_winner(game_num);
-    LogVictory(game_num);
+    LogVictory(game_num, g.winner);
   }
 }

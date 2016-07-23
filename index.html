@@ -14,26 +14,62 @@
   </head>
   <body>
     <div class="container">
-      <div class="col-md-2">
-        <h2 id="p1_name">p1</h2>
-        <h3 id="p1_time">10</h3>
+      <!-- Nav tabs -->
+      <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Lobby</a></li>
+        <li role="presentation"><a href="#profile" aria-controls="profile" id="game_tab" role="tab" data-toggle="tab">Game</a></li>
+      </ul>
+
+      <!-- Tab panes -->
+      <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="home">
+          <div class="row">
+            <div class="col-md-9">
+              <table class="table table-striped" id="games_table">
+                <tbody>
+                  <tr>
+                    <th>Game Num</th>
+                    <th>p1</th>
+                    <th>p2</th>
+                    <th>Time Per Move</th>
+                    <th>status</th>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col-md-3">
+              <button type="button" id="btn_host_game" class="btn btn-success btn-block btn-lg">Host Game</button>
+            </div>
+          </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="profile">
+          <div class="row">
+            <div class="col-md-2">
+              <h2 id="p1_name">p1</h2>
+              <h3 id="p1_time">10</h3>
+            </div>
+            <div class="col-md-7" id="board"></div>
+            <div class="col-md-3">
+              <h2 id="p2_name">p2</h2>
+              <h3 id="p2_time">20</h3>
+              <p id="status"></p>
+              <button type="button" id="btn_make_move" class="btn btn-success btn-block btn-lg">Make Move</button>
+              <hr>
+              <button type="button" id="btn_join" class="btn btn-primary btn-block">Join This Game</button>
+              <hr>
+              <div class="input-group">
+                <span class="input-group-btn">
+                  <button class="btn btn-default" id="btn_switch" type="button">Switch</button>
+                </span>
+                <input type="text" class="form-control" id="new_game_num" placeholder="17">
+              </div><!-- /input-group -->
+            </div>
+          </div><!-- /row -->
+        </div>
+        <div role="tabpanel" class="tab-pane" id="messages">456</div>
+        <div role="tabpanel" class="tab-pane" id="settings">789</div>
       </div>
-      <div class="col-md-7" id="board"></div>
-      <div class="col-md-3">
-        <h2 id="p2_name">p2</h2>
-        <h3 id="p2_time">20</h3>
-        <p id="status"></p>
-        <button type="button" id="btn_make_move" class="btn btn-success btn-block btn-lg">Make Move</button>
-        <hr>
-        <button type="button" id="btn_join" class="btn btn-primary btn-block">Join This Game</button>
-        <hr>
-        <div class="input-group">
-          <span class="input-group-btn">
-            <button class="btn btn-default" id="btn_switch" type="button">Switch</button>
-          </span>
-          <input type="text" class="form-control" id="new_game_num" placeholder="17">
-        </div><!-- /input-group -->
-      </div>
+
     </div><!-- /.container -->
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
