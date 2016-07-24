@@ -3,23 +3,31 @@ $(function(){
         width: 50,
     });
 
+
     var turn = 1;
     var moves_left = 1;
-    var contract_address = '0xA917659E2BcB3C0EDb52055f4D8B97BfB173A7Ba';
+    var contract_address = '0x5f41c7d0bc243DE9b1e8507A37fae8c39C9A33ee';
 
-    var contractABI = [ { "constant": true, "inputs": [ { "name": "game_num", "type": "uint256" }, { "name": "x", "type": "uint8" }, { "name": "y", "type": "uint8" } ], "name": "board", "outputs": [ { "name": "", "type": "uint8", "value": "0" } ], "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "uint256" } ], "name": "games", "outputs": [ { "name": "turn", "type": "uint8", "value": "0" }, { "name": "winner", "type": "uint8", "value": "0" }, { "name": "time_per_move", "type": "uint256", "value": "0" }, { "name": "deadline", "type": "uint256", "value": "0" }, { "name": "player_1_stake", "type": "uint256", "value": "0" }, { "name": "player_2_stake", "type": "uint256", "value": "0" } ], "type": "function" }, { "constant": true, "inputs": [ { "name": "game_num", "type": "uint256" } ], "name": "player_2", "outputs": [ { "name": "", "type": "address", "value": "0x" } ], "type": "function" }, { "constant": false, "inputs": [ { "name": "game_num", "type": "uint256" }, { "name": "x1", "type": "uint8" }, { "name": "y1", "type": "uint8" }, { "name": "x2", "type": "uint8" }, { "name": "y2", "type": "uint8" }, { "name": "wx", "type": "uint8" }, { "name": "wy", "type": "uint8" }, { "name": "dir", "type": "uint8" } ], "name": "make_move_and_claim_victory", "outputs": [], "type": "function" }, { "constant": true, "inputs": [ { "name": "game_num", "type": "uint256" } ], "name": "player_1", "outputs": [ { "name": "", "type": "address", "value": "0x" } ], "type": "function" }, { "constant": false, "inputs": [ { "name": "game_num", "type": "uint256" }, { "name": "x", "type": "uint8" }, { "name": "y", "type": "uint8" }, { "name": "dir", "type": "uint8" } ], "name": "claim_victory", "outputs": [], "type": "function" }, { "constant": false, "inputs": [ { "name": "game_num", "type": "uint256" } ], "name": "join_game", "outputs": [], "type": "function" }, { "constant": false, "inputs": [ { "name": "game_num", "type": "uint256" }, { "name": "x1", "type": "uint8" }, { "name": "y1", "type": "uint8" }, { "name": "x2", "type": "uint8" }, { "name": "y2", "type": "uint8" } ], "name": "make_move", "outputs": [], "type": "function" }, { "constant": false, "inputs": [ { "name": "_time_per_move", "type": "uint256" }, { "name": "opponent_stake", "type": "uint256" } ], "name": "new_game", "outputs": [], "type": "function" }, { "constant": true, "inputs": [], "name": "board_size", "outputs": [ { "name": "", "type": "uint8", "value": "19" } ], "type": "function" }, { "constant": false, "inputs": [ { "name": "game_num", "type": "uint256" } ], "name": "claim_time_victory", "outputs": [], "type": "function" }, { "inputs": [], "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "game_num", "type": "uint256" } ], "name": "LogGameCreated", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "game_num", "type": "uint256" } ], "name": "LogGameStarted", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "game_num", "type": "uint256" } ], "name": "LogVictory", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "game_num", "type": "uint256" }, { "indexed": false, "name": "x1", "type": "uint8" }, { "indexed": false, "name": "y1", "type": "uint8" }, { "indexed": false, "name": "x2", "type": "uint8" }, { "indexed": false, "name": "y2", "type": "uint8" } ], "name": "LogMoveMade", "type": "event" } ]
+    var contractABI = [ { "constant": true, "inputs": [ { "name": "game_num", "type": "uint256" }, { "name": "x", "type": "uint8" }, { "name": "y", "type": "uint8" } ], "name": "board", "outputs": [ { "name": "", "type": "uint8", "value": "0" } ], "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "uint256" } ], "name": "games", "outputs": [ { "name": "turn", "type": "uint8", "value": "0" }, { "name": "winner", "type": "uint8", "value": "0" }, { "name": "time_per_move", "type": "uint256", "value": "0" }, { "name": "deadline", "type": "uint256", "value": "0" }, { "name": "player_1_stake", "type": "uint256", "value": "0" }, { "name": "player_2_stake", "type": "uint256", "value": "0" }, { "name": "x1", "type": "uint8", "value": "0" }, { "name": "y1", "type": "uint8", "value": "0" }, { "name": "x2", "type": "uint8", "value": "0" }, { "name": "y2", "type": "uint8", "value": "0" } ], "type": "function" }, { "constant": true, "inputs": [ { "name": "game_num", "type": "uint256" } ], "name": "player_2", "outputs": [ { "name": "", "type": "address", "value": "0x" } ], "type": "function" }, { "constant": false, "inputs": [ { "name": "game_num", "type": "uint256" }, { "name": "x1", "type": "uint8" }, { "name": "y1", "type": "uint8" }, { "name": "x2", "type": "uint8" }, { "name": "y2", "type": "uint8" }, { "name": "wx", "type": "uint8" }, { "name": "wy", "type": "uint8" }, { "name": "dir", "type": "uint8" } ], "name": "make_move_and_claim_victory", "outputs": [], "type": "function" }, { "constant": true, "inputs": [ { "name": "game_num", "type": "uint256" } ], "name": "player_1", "outputs": [ { "name": "", "type": "address", "value": "0x" } ], "type": "function" }, { "constant": false, "inputs": [ { "name": "game_num", "type": "uint256" }, { "name": "x", "type": "uint8" }, { "name": "y", "type": "uint8" }, { "name": "dir", "type": "uint8" } ], "name": "claim_victory", "outputs": [], "type": "function" }, { "constant": false, "inputs": [ { "name": "game_num", "type": "uint256" } ], "name": "join_game", "outputs": [], "type": "function" }, { "constant": false, "inputs": [ { "name": "game_num", "type": "uint256" }, { "name": "x1", "type": "uint8" }, { "name": "y1", "type": "uint8" }, { "name": "x2", "type": "uint8" }, { "name": "y2", "type": "uint8" } ], "name": "make_move", "outputs": [], "type": "function" }, { "constant": false, "inputs": [ { "name": "_time_per_move", "type": "uint256" }, { "name": "opponent_stake", "type": "uint256" } ], "name": "new_game", "outputs": [], "type": "function" }, { "constant": true, "inputs": [], "name": "board_size", "outputs": [ { "name": "", "type": "uint8", "value": "19" } ], "type": "function" }, { "constant": false, "inputs": [ { "name": "game_num", "type": "uint256" } ], "name": "claim_time_victory", "outputs": [], "type": "function" }, { "inputs": [], "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "game_num", "type": "uint256" } ], "name": "LogGameCreated", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "game_num", "type": "uint256" } ], "name": "LogGameStarted", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "game_num", "type": "uint256" }, { "indexed": false, "name": "winner", "type": "uint8" } ], "name": "LogVictory", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "game_num", "type": "uint256" }, { "indexed": false, "name": "x1", "type": "uint8" }, { "indexed": false, "name": "y1", "type": "uint8" }, { "indexed": false, "name": "x2", "type": "uint8" }, { "indexed": false, "name": "y2", "type": "uint8" } ], "name": "LogMoveMade", "type": "event" } ];
+
+    var registry_contract_address = '0xdbE4Fa78a37E686380Fb26e9345B3AdFe5A58ae7';
+    var registryContractABI = [ { "constant": true, "inputs": [ { "name": "addr", "type": "address" } ], "name": "get_username", "outputs": [ { "name": "", "type": "string", "value": "" } ], "type": "function" }, { "constant": false, "inputs": [ { "name": "username", "type": "string" } ], "name": "register", "outputs": [], "type": "function" } ];
     
-
     if(typeof web3 !== 'undefined' && typeof Web3 !== 'undefined') {
         // If there's a web3 library loaded, then make your own web3
         web3 = new Web3(web3.currentProvider);
     } else if (typeof Web3 !== 'undefined') {
         // If there isn't then set a provider
         web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+    } else {
+      //alert("You are not using an Ethereum enabled browser. Please install Mist.");
     }
 
     var connectsix_contract = web3.eth.contract(contractABI);
     var connectsix = connectsix_contract.at(contract_address);
+
+    var registry_contract = web3.eth.contract(registryContractABI);
+    var registry = registry_contract.at(registry_contract_address);
 
     var current_game_num = 0;
 
@@ -33,16 +41,36 @@ $(function(){
         player_board[i] = new Array(19);
     }
 
+    var get_username = function(addr) {
+      var MAX_LEN = 10;
+      name = registry.get_username(addr);
+      if (name == "") {
+        return addr.substring(0, MAX_LEN);
+      }
+      return name.substring(0, MAX_LEN);
+    }
+
+    var get_player_names = function(game_num) {
+        var p1 = get_username(connectsix.player_1(game_num));
+        var p2 = get_username(connectsix.player_2(game_num));
+        return [p1, p2];
+    }
+
     var sync_state = function() {
         game_metadata = connectsix.games(current_game_num);
-        player_1 = connectsix.player_1(current_game_num);
-        player_2 = connectsix.player_2(current_game_num);
+        var player_names = get_player_names(current_game_num);
+        player_1 = player_names[0];
+        player_2 = player_names[1];
         turn = game_metadata[0].toNumber();
-        winner = game_metadata[1];
+        winner = game_metadata[1].toNumber();
         time_per_move = game_metadata[2].toNumber();
         deadline = game_metadata[3].toNumber();
         player_1_stake = game_metadata[4];
         player_2_stake = game_metadata[5];
+        x1 = game_metadata[6].toNumber();
+        y1 = game_metadata[7].toNumber();
+        x2 = game_metadata[8].toNumber();
+        y2 = game_metadata[9].toNumber();
         for (var x = 0; x < 19; x++) {
             for (var y = 0; y < 19; y++) {
                 board_state[x][y] = connectsix.board(current_game_num, x, y).toNumber();
@@ -74,6 +102,20 @@ $(function(){
                 y: my_moves[i].y,
                 type: "CR"
             });
+        }
+        // draw last 2 moves
+        if (!(x1 == x2 && y1 == y2)) {
+          // if at least one move was played
+          board.addObject({
+              x: x1,
+              y: y1,
+              type: "CR"
+          });
+          board.addObject({
+              x: x2,
+              y: y2,
+              type: "CR"
+          });
         }
     }
 
@@ -178,9 +220,18 @@ $(function(){
 
     var refresh = function() {
         update_status();
-        $("#p1_name").text(player_1.substring(0, 7));
-        $("#p2_name").text(player_2.substring(0, 7));
-        $("#p1_time").text(formatTime(deadline - Date.now()));
+        $("#p1_name").text(player_1);
+        $("#p2_name").text(player_2);
+        if (turn == 1) {
+            $("#p1_time").text(formatTime(deadline * 1000 - Date.now()));
+            $("#p2_time").text(formatTime(time_per_move * 1000));
+        } else if (turn == 2) {
+            $("#p1_time").text(formatTime(time_per_move * 1000));
+            $("#p2_time").text(formatTime(deadline * 1000 - Date.now()));
+        } else {
+            $("#p1_time").text(formatTime(time_per_move * 1000));
+            $("#p2_time").text(formatTime(time_per_move * 1000));
+        }
         for (var x = 0; x < 19; x++) {
             for (var y = 0; y < 19; y++) {
                 var r = board_state[x][y];
@@ -216,6 +267,7 @@ $(function(){
 
 
     $("#btn_make_move").click(function(){
+        check_accounts();
         if (my_moves.length == 2) {
             w = find_winner();
             if (w == false) {
@@ -236,9 +288,28 @@ $(function(){
         }
     });
 
+    var check_accounts = function() {
+      if (web3.eth.accounts.length < 1) {
+        alert ("Make sure 1 Ethereum account is selected.");
+      }
+    }
+
     $("#btn_join").click(function() {
+        check_accounts();
+        if (player_2_stake != 0) {
+          alert("Warning: you are about to send Ether because this room requires stake.");
+        }
         if (turn == 0) {
-            connectsix.join_game(current_game_num);
+            connectsix.join_game(current_game_num, {from: web3.eth.accounts[0], value: player_2_stake});
+        }
+    });
+
+    $("#btn_time_victory").click(function() {
+        check_accounts();
+        if (deadline * 1000 - Date.now() > 0) {
+            alert("Your opponent still has some time left.");
+        } else {
+            connectsix.claim_time_victory(current_game_num, {from: web3.eth.accounts[0]});
         }
     });
 
@@ -249,15 +320,38 @@ $(function(){
     });
 
     $("#btn_host_game").click(function(){
-        connectsix.new_game(1000, 0, {from: web3.eth.accounts[0]});
-        // 1000 is the time
+        check_accounts();
+        $("#newGameModal").modal('show');
+    });
+
+    $("#btn_open_register").click(function(){
+        $("#registerModal").modal('show');
+    });
+
+    var register_account = function(username) {
+        registry.register(username, {from: web3.eth.accounts[0]});
+    }
+
+    $("#btn_register").click(function(){
+        check_accounts();
+        register_account($("#username_inp").val());
+        $("#registerModal").modal('hide');
+    });
+
+    $("#btn_start").click(function(){
+        var sec_per_move = $("#time_init").val();
+        var p1_stk = web3.toWei($("#p1_stake").val(), "ether");
+        var p2_stk = web3.toWei($("#p2_stake").val(), "ether");
+        connectsix.new_game(sec_per_move, p2_stk, {from: web3.eth.accounts[0], value: p1_stk});
+        $("#newGameModal").modal('hide');
+        alert("Create game transaction is sent. Refresh the list in a few seconds");
     });
 
     (function(){
         // do some stuff
         sync_state();
         refresh();
-        setTimeout(arguments.callee, 2000);
+        setTimeout(arguments.callee, 5000);
     })();
 
 
@@ -267,28 +361,75 @@ $(function(){
         board.setWidth($("#board").width());
     })
 
-    var i = 0;
-    while (true) {
-      var row = "<td>" + '<button type="button" class="btn btn-danger">' + i + "</button>" + "</td>";
-      var p1 = connectsix.player_1(i);
-      if (p1 == "0x" || i == 20) {
-        break;
-      }
-      row += "<td>" + p1.substring(0, 7) + "</td>"
-      row += "<td>" + connectsix.player_2(i).substring(0, 7) + "</td>"
-      row += "<td>" + connectsix.games(i)[2].toNumber() + "</td>" // time per move
-      row += "<td>" + "waiting" + "</td>"
-      $('#games_table tbody').append("<tr>" + row + "</tr>");
-      i += 1;
+    var get_game_status = function(game_num) {
+        game_metadata = connectsix.games(game_num);
+        turn = game_metadata[0].toNumber();
+        winner = game_metadata[1].toNumber();
+        if (winner != 0) {
+            return "finished";
+        } else if (turn == 0) {
+            return "waiting";
+        } else {
+            return "playing";
+        }
     }
 
-    $('#games_table').on('click', 'tr button', function (event) {
-        $("#game_tab").tab('show')
-        current_game_num = $(this).text();
-        sync_state();
-        refresh();
-        board.setWidth($("#board").width());
+    var check_my_game = function(game_num) {
+        if (get_game_status(game_num) == "finished") {
+          return false;
+        }
+        if (connectsix.player_1(game_num) == web3.eth.accounts[0] || 
+            connectsix.player_2(game_num) == web3.eth.accounts[0]) {
+          return true;
+        }
+        return false;
+    }
+
+    var refresh_games = function() {
+        $('#games_table').find("tr:gt(0)").remove();
+        var i = 0;
+        for (var i = 0; i < 100; i++) {
+          if ($('#only_my_games').prop('checked') && !check_my_game(i)) {
+            continue;
+          }
+          var game_status = get_game_status(i);
+          if (game_status == "finished") {
+            row = "<td>" + '<button type="button" class="btn btn-danger">' + i + "</button>" + "</td>";
+          } else if (game_status == "waiting") {
+            row = "<td>" + '<button type="button" class="btn btn-success">' + i + "</button>" + "</td>";
+          } else {
+            row = "<td>" + '<button type="button" class="btn btn-primary">' + i + "</button>" + "</td>";
+          }
+          var player_names = get_player_names(i);
+          var p1 = player_names[0];
+          var p2 = player_names[1];
+          var game_metadata = connectsix.games(i);
+          var p1_stake = web3.fromWei(game_metadata[4], "ether");
+          var p2_stake = web3.fromWei(game_metadata[5], "ether");
+          if (p1 == "0x") {
+              break;
+          }
+          row += "<td>" + formatTime(connectsix.games(i)[2].toNumber() * 1000) + "</td>" // time per move
+          row += "<td>" + p1 + "</td>"
+          row += "<td>" + p1_stake + "</td>"
+          row += "<td>" + p2 + "</td>"
+          row += "<td>" + p2_stake + "</td>"
+          $('#games_table tbody').append("<tr>" + row + "</tr>");
+        }
+
+        $('#games_table').on('click', 'tr button', function (event) {
+            $("#game_tab").tab('show')
+            current_game_num = $(this).text();
+            sync_state();
+            refresh();
+            board.setWidth($("#board").width());
+        });
+    }
+
+    $("#btn_refresh").click(function(){
+        refresh_games();
     });
 
+    refresh_games();
 
 });

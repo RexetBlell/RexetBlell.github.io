@@ -4,7 +4,7 @@ contract UsernameRegistry {
   mapping(string => address) str_to_addr;
 
   function register(string username) {
-    if (str_to_addr[username] == address(0)) {
+    if (str_to_addr[username] != address(0)) {
       // username taken
       throw;
     }
