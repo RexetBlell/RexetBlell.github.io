@@ -42,6 +42,9 @@ $(function(){
     }
 
     var get_username = function(addr) {
+      if (addr == "0x" || addr == "0x0") {
+        return addr;
+      }
       var MAX_LEN = 10;
       name = registry.get_username(addr);
       if (name == "") {
