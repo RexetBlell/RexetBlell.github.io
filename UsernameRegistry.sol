@@ -16,4 +16,8 @@ contract UsernameRegistry {
   function get_username(address addr) constant returns (string) {
     return addr_to_str[addr];
   }
+
+  function get_address(string username) constant returns (address) {
+    return str_to_addr[username];
+  }
 }

@@ -37,7 +37,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" id="btn_start" class="btn btn-primary">Start</button>
+            <button type="button" id="btn_start" class="btn btn-primary">Create</button>
           </div>
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
@@ -94,9 +94,9 @@
               <hr>
               <button type="button" id="btn_host_game" class="btn btn-success btn-block btn-lg">Host Game</button>
               <hr>
-              <button type="button" id="btn_refresh" class="btn btn-primary btn-block btn-lg">Refresh</button>
+              <button type="button" id="btn_open_register" class="btn btn-primary btn-block btn-lg">Select Username</button>
               <hr>
-              <button type="button" id="btn_open_register" class="btn btn-primary btn-block btn-lg">Register</button>
+              <button type="button" id="btn_refresh" class="btn btn-primary btn-block btn-lg">Refresh</button>
               <hr>
               <div class="checkbox">
                 <label>
@@ -110,13 +110,21 @@
         <div role="tabpanel" class="tab-pane" id="profile">
           <div class="row">
             <div class="col-md-2">
+              <h4>Player 1 (black)</h4>
               <h2 id="p1_name">p1</h2>
               <h3 id="p1_time">10</h3>
               <hr>
               <h5 id="status"></h5>
+              <hr>
+              <h4>Browse moves:</h4>
+              <button type="button" id="btn_history_start" class="btn btn-info btn-block">Rewind</button>
+              <button type="button" id="btn_history_back" class="btn btn-info btn-block">Prev</button>
+              <button type="button" id="btn_history_next" class="btn btn-info btn-block">Next</button>
+              <button type="button" id="btn_history_end" class="btn btn-info btn-block">FF</button>
             </div>
             <div class="col-md-7" id="board"></div>
             <div class="col-md-3">
+              <h4>Player 2 (white)</h4>
               <h2 id="p2_name">p2</h2>
               <h3 id="p2_time">20</h3>
               <button type="button" id="btn_make_move" class="btn btn-success btn-block btn-lg">Make Move</button>
@@ -124,7 +132,6 @@
               <button type="button" id="btn_join" class="btn btn-primary btn-block">Join This Game</button>
               <hr>
               <button type="button" id="btn_time_victory" class="btn btn-primary btn-block">Claim Time Victory</button>
-              <hr>
             </div>
           </div><!-- /row -->
         </div>

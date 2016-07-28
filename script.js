@@ -3,15 +3,16 @@ $(function(){
         width: 50,
     });
 
-
     var turn = 1;
+    var move_history;
+    var history_move_num;
     var moves_left = 1;
-    var contract_address = '0x5f41c7d0bc243DE9b1e8507A37fae8c39C9A33ee';
+    var contract_address = '0xcf00354366bca2f2cd49007bfaeac49d97463200';
 
-    var contractABI = [ { "constant": true, "inputs": [ { "name": "game_num", "type": "uint256" }, { "name": "x", "type": "uint8" }, { "name": "y", "type": "uint8" } ], "name": "board", "outputs": [ { "name": "", "type": "uint8", "value": "0" } ], "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "uint256" } ], "name": "games", "outputs": [ { "name": "turn", "type": "uint8", "value": "0" }, { "name": "winner", "type": "uint8", "value": "0" }, { "name": "time_per_move", "type": "uint256", "value": "0" }, { "name": "deadline", "type": "uint256", "value": "0" }, { "name": "player_1_stake", "type": "uint256", "value": "0" }, { "name": "player_2_stake", "type": "uint256", "value": "0" }, { "name": "x1", "type": "uint8", "value": "0" }, { "name": "y1", "type": "uint8", "value": "0" }, { "name": "x2", "type": "uint8", "value": "0" }, { "name": "y2", "type": "uint8", "value": "0" } ], "type": "function" }, { "constant": true, "inputs": [ { "name": "game_num", "type": "uint256" } ], "name": "player_2", "outputs": [ { "name": "", "type": "address", "value": "0x" } ], "type": "function" }, { "constant": false, "inputs": [ { "name": "game_num", "type": "uint256" }, { "name": "x1", "type": "uint8" }, { "name": "y1", "type": "uint8" }, { "name": "x2", "type": "uint8" }, { "name": "y2", "type": "uint8" }, { "name": "wx", "type": "uint8" }, { "name": "wy", "type": "uint8" }, { "name": "dir", "type": "uint8" } ], "name": "make_move_and_claim_victory", "outputs": [], "type": "function" }, { "constant": true, "inputs": [ { "name": "game_num", "type": "uint256" } ], "name": "player_1", "outputs": [ { "name": "", "type": "address", "value": "0x" } ], "type": "function" }, { "constant": false, "inputs": [ { "name": "game_num", "type": "uint256" }, { "name": "x", "type": "uint8" }, { "name": "y", "type": "uint8" }, { "name": "dir", "type": "uint8" } ], "name": "claim_victory", "outputs": [], "type": "function" }, { "constant": false, "inputs": [ { "name": "game_num", "type": "uint256" } ], "name": "join_game", "outputs": [], "type": "function" }, { "constant": false, "inputs": [ { "name": "game_num", "type": "uint256" }, { "name": "x1", "type": "uint8" }, { "name": "y1", "type": "uint8" }, { "name": "x2", "type": "uint8" }, { "name": "y2", "type": "uint8" } ], "name": "make_move", "outputs": [], "type": "function" }, { "constant": false, "inputs": [ { "name": "_time_per_move", "type": "uint256" }, { "name": "opponent_stake", "type": "uint256" } ], "name": "new_game", "outputs": [], "type": "function" }, { "constant": true, "inputs": [], "name": "board_size", "outputs": [ { "name": "", "type": "uint8", "value": "19" } ], "type": "function" }, { "constant": false, "inputs": [ { "name": "game_num", "type": "uint256" } ], "name": "claim_time_victory", "outputs": [], "type": "function" }, { "inputs": [], "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "game_num", "type": "uint256" } ], "name": "LogGameCreated", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "game_num", "type": "uint256" } ], "name": "LogGameStarted", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "game_num", "type": "uint256" }, { "indexed": false, "name": "winner", "type": "uint8" } ], "name": "LogVictory", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "game_num", "type": "uint256" }, { "indexed": false, "name": "x1", "type": "uint8" }, { "indexed": false, "name": "y1", "type": "uint8" }, { "indexed": false, "name": "x2", "type": "uint8" }, { "indexed": false, "name": "y2", "type": "uint8" } ], "name": "LogMoveMade", "type": "event" } ];
+    var contractABI = [{"constant":true,"inputs":[{"name":"game_num","type":"uint256"},{"name":"x","type":"uint8"},{"name":"y","type":"uint8"}],"name":"board","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"games","outputs":[{"name":"turn","type":"uint8"},{"name":"winner","type":"uint8"},{"name":"time_per_move","type":"uint256"},{"name":"deadline","type":"uint256"},{"name":"player_1_stake","type":"uint256"},{"name":"player_2_stake","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[{"name":"game_num","type":"uint256"}],"name":"player_2","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"game_num","type":"uint256"},{"name":"x1","type":"uint8"},{"name":"y1","type":"uint8"},{"name":"x2","type":"uint8"},{"name":"y2","type":"uint8"},{"name":"wx","type":"uint8"},{"name":"wy","type":"uint8"},{"name":"dir","type":"uint8"}],"name":"make_move_and_claim_victory","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"game_num","type":"uint256"}],"name":"player_1","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"game_num","type":"uint256"},{"name":"x","type":"uint8"},{"name":"y","type":"uint8"},{"name":"dir","type":"uint8"}],"name":"claim_victory","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"game_num","type":"uint256"}],"name":"join_game","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"game_num","type":"uint256"}],"name":"move_history","outputs":[{"name":"","type":"uint8[]"}],"type":"function"},{"constant":false,"inputs":[{"name":"game_num","type":"uint256"},{"name":"x1","type":"uint8"},{"name":"y1","type":"uint8"},{"name":"x2","type":"uint8"},{"name":"y2","type":"uint8"}],"name":"make_move","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_time_per_move","type":"uint256"},{"name":"opponent_stake","type":"uint256"}],"name":"new_game","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"board_size","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[{"name":"game_num","type":"uint256"}],"name":"claim_time_victory","outputs":[],"type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"game_num","type":"uint256"}],"name":"LogGameCreated","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"game_num","type":"uint256"}],"name":"LogGameStarted","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"game_num","type":"uint256"},{"indexed":false,"name":"winner","type":"uint8"}],"name":"LogVictory","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"game_num","type":"uint256"},{"indexed":false,"name":"x1","type":"uint8"},{"indexed":false,"name":"y1","type":"uint8"},{"indexed":false,"name":"x2","type":"uint8"},{"indexed":false,"name":"y2","type":"uint8"}],"name":"LogMoveMade","type":"event"}];
 
-    var registry_contract_address = '0xdbE4Fa78a37E686380Fb26e9345B3AdFe5A58ae7';
-    var registryContractABI = [ { "constant": true, "inputs": [ { "name": "addr", "type": "address" } ], "name": "get_username", "outputs": [ { "name": "", "type": "string", "value": "" } ], "type": "function" }, { "constant": false, "inputs": [ { "name": "username", "type": "string" } ], "name": "register", "outputs": [], "type": "function" } ];
+    var registry_contract_address = '0xa35fc4d3ea15e0d9272dc181ee1c2761d5d0cabd';
+    var registryContractABI = [{"constant":true,"inputs":[{"name":"username","type":"string"}],"name":"get_address","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":true,"inputs":[{"name":"addr","type":"address"}],"name":"get_username","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":false,"inputs":[{"name":"username","type":"string"}],"name":"register","outputs":[],"type":"function"}];
     
     if(typeof web3 !== 'undefined' && typeof Web3 !== 'undefined') {
         // If there's a web3 library loaded, then make your own web3
@@ -32,6 +33,9 @@ $(function(){
     var current_game_num = 0;
 
     var my_moves = [];
+
+    // mode can be normal or move_replay
+    var mode = "normal";
 
     var game_metadata;
     var board_state = new Array(19);
@@ -68,12 +72,20 @@ $(function(){
         winner = game_metadata[1].toNumber();
         time_per_move = game_metadata[2].toNumber();
         deadline = game_metadata[3].toNumber();
+        move_history = connectsix.move_history(current_game_num);
         player_1_stake = game_metadata[4];
         player_2_stake = game_metadata[5];
-        x1 = game_metadata[6].toNumber();
-        y1 = game_metadata[7].toNumber();
-        x2 = game_metadata[8].toNumber();
-        y2 = game_metadata[9].toNumber();
+        if (move_history.length > 0) {
+          x1 = move_history[move_history.length - 4].toNumber();
+          y1 = move_history[move_history.length - 3].toNumber();
+          x2 = move_history[move_history.length - 2].toNumber();
+          y2 = move_history[move_history.length - 1].toNumber();
+        } else {
+          x1 = -1;
+          y1 = -1;
+          x2 = -1;
+          y2 = -1;
+        }
         for (var x = 0; x < 19; x++) {
             for (var y = 0; y < 19; y++) {
                 board_state[x][y] = connectsix.board(current_game_num, x, y).toNumber();
@@ -107,7 +119,7 @@ $(function(){
             });
         }
         // draw last 2 moves
-        if (!(x1 == x2 && y1 == y2)) {
+        if (x1 >= 0) {
           // if at least one move was played
           board.addObject({
               x: x1,
@@ -182,7 +194,9 @@ $(function(){
 
     var update_status = function() {
         
-        if (player_1 == "0x0") {
+        if (mode == "replay") {
+            $("#status").text("You are in replay mode. Click on the board to back to normal mode.");
+        } else if (player_1 == "0x0") {
             $("#status").text("Game not created");
         } else if (winner == 1) {
             $("#status").text("Player 1 wins");
@@ -221,10 +235,7 @@ $(function(){
       return result;
     }
 
-    var refresh = function() {
-        update_status();
-        $("#p1_name").text(player_1);
-        $("#p2_name").text(player_2);
+    var update_time = function() {
         if (turn == 1) {
             $("#p1_time").text(formatTime(deadline * 1000 - Date.now()));
             $("#p2_time").text(formatTime(time_per_move * 1000));
@@ -235,29 +246,51 @@ $(function(){
             $("#p1_time").text(formatTime(time_per_move * 1000));
             $("#p2_time").text(formatTime(time_per_move * 1000));
         }
-        for (var x = 0; x < 19; x++) {
-            for (var y = 0; y < 19; y++) {
-                var r = board_state[x][y];
-                board.removeObjectsAt(x, y);
-                if (r == 1) {
-                    board.addObject({
-                        x: x,
-                        y: y,
-                        c: WGo.B
-                    });
-                } else if (r == 2) {
-                    board.addObject({
-                        x: x,
-                        y: y,
-                        c: WGo.W
-                    });
+    }
+
+    var refresh = function() {
+        update_status();
+        if (deadline * 1000 - Date.now() > 0) {
+          $("#btn_time_victory").prop('disabled', true);
+        } else {
+          // if time ran out
+          $("#btn_time_victory").prop('disabled', false);
+        }
+        if (turn == 0) {
+          $("#btn_join").prop('disabled', false);
+          $("#btn_time_victory").prop('disabled', true);
+        } else {
+          // disable the button if the game already started
+          $("#btn_join").prop('disabled', true);
+        }
+        $("#p1_name").text(player_1);
+        $("#p2_name").text(player_2);
+        if (mode == "normal") {
+            for (var x = 0; x < 19; x++) {
+                for (var y = 0; y < 19; y++) {
+                    var r = board_state[x][y];
+                    board.removeObjectsAt(x, y);
+                    if (r == 1) {
+                        board.addObject({
+                            x: x,
+                            y: y,
+                            c: WGo.B
+                        });
+                    } else if (r == 2) {
+                        board.addObject({
+                            x: x,
+                            y: y,
+                            c: WGo.W
+                        });
+                    }
                 }
             }
+            draw_my_moves();
         }
-        draw_my_moves();
     }
 
     board.addEventListener("click", function(x, y) {
+        mode = "normal";
         if (my_moves.length >= 2
                 || (my_moves.length == 1 && my_moves[0].x == x && my_moves[0].y == y)
                 || board_state[x][y] != 0) {
@@ -267,7 +300,6 @@ $(function(){
         }
         refresh();
     });
-
 
     $("#btn_make_move").click(function(){
         check_accounts();
@@ -332,7 +364,11 @@ $(function(){
     });
 
     var register_account = function(username) {
-        registry.register(username, {from: web3.eth.accounts[0]});
+        if(registry.get_address(username) == "0x0000000000000000000000000000000000000000") {
+          registry.register(username, {from: web3.eth.accounts[0]});
+        } else {
+          alert("Username taken");
+        }
     }
 
     $("#btn_register").click(function(){
@@ -351,10 +387,15 @@ $(function(){
     });
 
     (function(){
-        // do some stuff
+        // regular updates
         sync_state();
         refresh();
         setTimeout(arguments.callee, 5000);
+    })();
+
+    (function(){
+        update_time()
+        setTimeout(arguments.callee, 500);
     })();
 
 
@@ -431,6 +472,85 @@ $(function(){
 
     $("#btn_refresh").click(function(){
         refresh_games();
+    });
+
+    var clear_board = function() {
+        for (var x = 0; x < 19; x++) {
+            for (var y = 0; y < 19; y++) {
+                board.removeObjectsAt(x, y);
+            }
+        }
+    }
+
+    var draw_history = function() {
+        if (move_history.length == 0) {
+          return;
+        }
+        update_status();
+        clear_board();
+        board.addObject({
+            x: 9,
+            y: 9,
+            c: WGo.B
+        });
+        for (var i = 0; i < history_move_num; i++) {
+            var col;
+            if (i % 2 == 0) {
+                col = WGo.W;
+            } else {
+                col = WGo.B;
+            }
+            board.addObject({
+                x: move_history[i * 4],
+                y: move_history[i * 4 + 1],
+                c: col
+            });
+            board.addObject({
+                x: move_history[i * 4 + 2],
+                y: move_history[i * 4 + 3],
+                c: col
+            });
+        }
+    }
+
+    $("#btn_history_start").click(function(){
+        if (mode == "normal") {
+            mode = "replay";
+        } 
+        history_move_num = 0;
+        draw_history();
+    });
+
+    $("#btn_history_back").click(function(){
+        if (mode == "normal") {
+            history_move_num = move_history.length / 4;
+            mode = "replay";
+        } 
+        history_move_num--;
+        if (history_move_num < 0) {
+            history_move_num = 0;
+        }
+        draw_history();
+    });
+
+    $("#btn_history_next").click(function(){
+        if (mode == "normal") {
+            history_move_num = move_history.length / 4;
+            mode = "replay";
+        } 
+        history_move_num++;
+        if (history_move_num > move_history.length / 4) {
+            history_move_num = move_history.length / 4;
+        }
+        draw_history();
+    });
+
+    $("#btn_history_end").click(function(){
+        if (mode == "normal") {
+            mode = "replay";
+        } 
+        history_move_num = move_history.length / 4;
+        draw_history();
     });
 
     refresh_games();

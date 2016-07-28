@@ -6,6 +6,7 @@ contract ConnectSix {
 
   struct Game {
       mapping(uint8 => mapping(uint8 => uint8)) board;
+      uint8[] move_history;
       address[3] players;
       // 0 means game did not start yet
       uint8 turn;
@@ -19,12 +20,6 @@ contract ConnectSix {
       uint player_1_stake;
       // amount player 2 must send to join
       uint player_2_stake;
-      
-      // represents the last move played
-      uint8 x1;
-      uint8 y1;
-      uint8 x2;
-      uint8 y2;
   }
 
   event LogGameCreated(uint game_num);
@@ -68,6 +63,10 @@ contract ConnectSix {
     return games[game_num].board[x][y];
   }
 
+  function move_history(uint game_num) constant returns (uint8[]) {
+      return games[game_num].move_history;
+  }
+
   function single_move(uint game_num, uint8 x, uint8 y) internal {
     if (x > board_size || y > board_size) {
       throw;
@@ -88,10 +87,14 @@ contract ConnectSix {
     single_move(game_num, x2, y2);
     g.turn = 3 - g.turn;
     g.deadline = now + g.time_per_move;
-    g.x1 = x1;
-    g.y1 = y1;
-    g.x2 = x2;
-    g.y2 = y2;
+    g.move_history.length++;
+    g.move_history[g.move_history.length - 1] = x1;
+    g.move_history.length++;
+    g.move_history[g.move_history.length - 1] = y1;
+    g.move_history.length++;
+    g.move_history[g.move_history.length - 1] = x2;
+    g.move_history.length++;
+    g.move_history[g.move_history.length - 1] = y2;
     LogMoveMade(game_num, x1, y1, x2, y2);
   }
 
