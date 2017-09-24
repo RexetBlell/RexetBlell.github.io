@@ -92,7 +92,7 @@ $(function(){
         }
 
         var refresh_games = function() {
-            if (output.length > 0 && output[output.length - 1].player_1 == "0x") {
+            if (cur_refresh_index == 3 || output.length > 0 && output[output.length - 1].player_1 == "0x") {
                 output.pop();
                 callback(null, output);
             } else {
@@ -457,6 +457,35 @@ $(function(){
         refresh();
     });
 
+    var check_accounts = function() {
+		if (web3.eth.accounts.length < 1) {
+			alert ("Make sure 1 Ethereum account is selected.");
+		}
+    }
+
+	var register_account = function(username) {
+		registry.get_address(username, function(error, result) {
+            if (result == "0x0000000000000000000000000000000000000000") {
+                registry.register(username, {from: web3.eth.accounts[0]}, function(error, result) { });
+            } else {
+			alert("Username taken");
+            }
+        });
+	}
+
+    // BUTTONS
+
+    // registration
+
+    $("#btn_open_register").click(function(){
+        $("#registerModal").modal('show');
+    });
+
+    $("#btn_register").click(function(){
+        check_accounts();
+        register_account($("#username_inp").val());
+        $("#registerModal").modal('hide');
+    });
 
 });
 
