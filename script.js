@@ -12,6 +12,12 @@ $(function(){
     var history_move_num;
     var moves_left = 1;
     var contract_address = '0xcf00354366bca2f2cd49007bfaeac49d97463200';
+    var deadline;
+    var time_per_move;
+    var player_1;
+    var player_2;
+    var winner;
+    var x1, y1, x2, y2;
 
     var contractABI = [{"constant":true,"inputs":[{"name":"game_num","type":"uint256"},{"name":"x","type":"uint8"},{"name":"y","type":"uint8"}],"name":"board","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"games","outputs":[{"name":"turn","type":"uint8"},{"name":"winner","type":"uint8"},{"name":"time_per_move","type":"uint256"},{"name":"deadline","type":"uint256"},{"name":"player_1_stake","type":"uint256"},{"name":"player_2_stake","type":"uint256"}],"type":"function"},{"constant":true,"inputs":[{"name":"game_num","type":"uint256"}],"name":"player_2","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"game_num","type":"uint256"},{"name":"x1","type":"uint8"},{"name":"y1","type":"uint8"},{"name":"x2","type":"uint8"},{"name":"y2","type":"uint8"},{"name":"wx","type":"uint8"},{"name":"wy","type":"uint8"},{"name":"dir","type":"uint8"}],"name":"make_move_and_claim_victory","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"game_num","type":"uint256"}],"name":"player_1","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":false,"inputs":[{"name":"game_num","type":"uint256"},{"name":"x","type":"uint8"},{"name":"y","type":"uint8"},{"name":"dir","type":"uint8"}],"name":"claim_victory","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"game_num","type":"uint256"}],"name":"join_game","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"game_num","type":"uint256"}],"name":"move_history","outputs":[{"name":"","type":"uint8[]"}],"type":"function"},{"constant":false,"inputs":[{"name":"game_num","type":"uint256"},{"name":"x1","type":"uint8"},{"name":"y1","type":"uint8"},{"name":"x2","type":"uint8"},{"name":"y2","type":"uint8"}],"name":"make_move","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"_time_per_move","type":"uint256"},{"name":"opponent_stake","type":"uint256"}],"name":"new_game","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"board_size","outputs":[{"name":"","type":"uint8"}],"type":"function"},{"constant":false,"inputs":[{"name":"game_num","type":"uint256"}],"name":"claim_time_victory","outputs":[],"type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"game_num","type":"uint256"}],"name":"LogGameCreated","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"game_num","type":"uint256"}],"name":"LogGameStarted","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"game_num","type":"uint256"},{"indexed":false,"name":"winner","type":"uint8"}],"name":"LogVictory","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"game_num","type":"uint256"},{"indexed":false,"name":"x1","type":"uint8"},{"indexed":false,"name":"y1","type":"uint8"},{"indexed":false,"name":"x2","type":"uint8"},{"indexed":false,"name":"y2","type":"uint8"}],"name":"LogMoveMade","type":"event"}];
 
@@ -39,28 +45,66 @@ $(function(){
         player_board[i] = new Array(19);
     }
 
+    var get_player_name = function(game_num, player_num, callback) {
+        var fn;
+        if (player_num == 1) {
+            fn = connectsix.player_1;
+        } else {
+            fn = connectsix.player_2;
+        }
+        fn(game_num, function(error, result) {
+            if (result == "0x" || result == "0x0") {
+                callback(null, result);
+            }
+            var MAX_LEN = 10;
+            registry.get_username(result, function(error, name) {
+                if (name == "") {
+                    callback(null, result.substring(0, MAX_LEN));
+                } else {
+                    callback(null, name.substring(0, MAX_LEN));
+                }
+            });
+        });
+    }
+
     var refresh_all = function(callback) {
         var cur_refresh_index = 0;
-        var result = [];
+        var output = [];
 
-        var refresh_game = function(error, game_metadata) {
-          result.push(game_metadata);
-          cur_refresh_index++;
-          refresh_games()
+        var refresh_game = function(error, result) {
+            game_metadata = {};
+            game_metadata.turn = result[0].toNumber();
+			game_metadata.winner = result[1].toNumber();
+			game_metadata.time_per_move = result[2].toNumber();
+			game_metadata.deadline = result[3].toNumber();
+			game_metadata.p1_stake = result[4];
+			game_metadata.p2_stake = result[5];
+
+            get_player_name(cur_refresh_index, 1, function(error, name1) {
+                game_metadata.player_1 = name1;
+                get_player_name(cur_refresh_index, 2, function(error, name2) {
+                    game_metadata.player_2 = name2;
+                    output.push(game_metadata);
+                    cur_refresh_index++;
+                    refresh_games();
+                });
+            });
         }
 
         var refresh_games = function() {
-            if (cur_refresh_index < 10) {
-                connectsix.games(cur_refresh_index, refresh_game);
+            if (output.length > 0 && output[output.length - 1].player_1 == "0x") {
+                output.pop();
+                callback(null, output);
             } else {
-                callback(null, result);
+                $("#status_lobby").text("Loaded " + cur_refresh_index + " games");
+                connectsix.games(cur_refresh_index, refresh_game);
             }
         }
 
         refresh_games();
     }
 
-    var draw_board = function(callback) {
+    var draw_board = function() {
         for (var x = 0; x < 19; x++) {
             for (var y = 0; y < 19; y++) {
                 board_state[x][y] = 0;
@@ -239,17 +283,26 @@ $(function(){
     }
 
     var sync_state = function(callback) {
-		player_1 = "p1";
-		player_2 = "p2";
 
-		connectsix.games(current_game_num, function(error, game_metadata) {
-			turn = game_metadata[0].toNumber();
-			winner = game_metadata[1].toNumber();
-			time_per_move = game_metadata[2].toNumber();
-			deadline = game_metadata[3].toNumber();
-			player_1_stake = game_metadata[4];
-			player_2_stake = game_metadata[5];
-            draw_board(function() { });
+		connectsix.games(current_game_num, function(error, result) {
+            player_1 = "p1";
+            player_2 = "p2";
+
+            turn = result[0].toNumber();
+			winner = result[1].toNumber();
+			time_per_move = result[2].toNumber();
+			deadline = result[3].toNumber();
+			player_1_stake = result[4];
+			player_2_stake = result[5];
+
+            get_player_name(current_game_num, 1, function(error, name1) {
+                player_1 = name1;
+                get_player_name(current_game_num, 2, function(error, name2) {
+                    player_2 = name2;
+                    draw_board();
+                });
+            });
+
         });
     }
 
@@ -275,9 +328,35 @@ $(function(){
 		return result;
 	}
 
+	var update_time = function() {
+		if (turn == 1) {
+			$("#p1_time").text(formatTime(deadline * 1000 - Date.now()));
+			$("#p2_time").text(formatTime(time_per_move * 1000));
+		} else if (turn == 2) {
+			$("#p1_time").text(formatTime(time_per_move * 1000));
+			$("#p2_time").text(formatTime(deadline * 1000 - Date.now()));
+		} else {
+			$("#p1_time").text(formatTime(time_per_move * 1000));
+			$("#p2_time").text(formatTime(time_per_move * 1000));
+		}
+	}
+
+    var regular_updates = function() {
+        // regular updates
+        sync_state();
+        refresh();
+        setTimeout(arguments.callee, 5000);
+    }
+    regular_updates();
+
+	(function(){
+        update_time()
+        setTimeout(arguments.callee, 500);
+    })();
+
 	var get_game_status = function(game_metadata) {
-		turn = game_metadata[0].toNumber();
-		winner = game_metadata[1].toNumber();
+		turn = game_metadata.turn;
+		winner = game_metadata.winner;
 		if (winner != 0) {
 			return "finished";
 		} else if (turn == 0) {
@@ -326,9 +405,12 @@ $(function(){
         draw_history();
     });
 
+    var get_player_names = function(game_num) {
+
+    }
 
     refresh_all(function(error, result) {
-        console.log("done refreshing");
+        $('#games_table').find("tr:gt(0)").remove();
         for (var i = 0; i < result.length; i++) {
             game_metadata = result[i];
 
@@ -341,12 +423,12 @@ $(function(){
                 row = "<td>" + '<button type="button" class="btn btn-primary">' + i + "</button>" + "</td>";
             }
 
-            var p1 = "dude 1";
-            var p2 = "dude2";
-            var p1_stake = web3.fromWei(game_metadata[4], "ether");
-            var p2_stake = web3.fromWei(game_metadata[5], "ether");
+            var p1 = game_metadata.player_1;
+            var p2 = game_metadata.player_2;
+            var p1_stake = web3.fromWei(game_metadata.p1_stake, "ether");
+            var p2_stake = web3.fromWei(game_metadata.p2_stake, "ether");
 
-            row += "<td>" + formatTime(game_metadata[2].toNumber() * 1000) + "</td>" // time per move
+            row += "<td>" + formatTime(game_metadata.time_per_move * 1000) + "</td>" // time per move
             row += "<td>" + p1 + "</td>"
             row += "<td>" + p1_stake + "</td>"
             row += "<td>" + p2 + "</td>"
