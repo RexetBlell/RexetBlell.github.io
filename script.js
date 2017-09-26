@@ -371,7 +371,7 @@ $(function(){
     var refresh_all_games = function() {
         refresh_game_object(function(error, result) {
             $('#games_table').find("tr:gt(0)").remove();
-            for (var i = 0; i < result.length; i++) {
+            for (var i = result.length - 1; i >= 0; i--) {
                 game_metadata = result[i];
                 if ($('#only_active').prop('checked') && get_game_status(game_metadata) == "finished") {
                     continue;
@@ -573,19 +573,25 @@ $(function(){
 
 }
 
+var web3_attempts = 10;
+function waitForWeb3() {
+    alert(web3_attempts);
+    if (typeof web3 !== "undefined") {
+        // Use Mist/MetaMask's provider
+        window.web3 = new Web3(web3.currentProvider);
+		startApp();
+    } else {
+        if (web3_attempts > 0) {
+            web3_attempts--;
+			setTimeout(waitForWeb3, 250);
+        } else {
+			alert('web3 was not injected by the browser. Install MetaMask!');
+			// fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
+			window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+        }
+    }
+}
+
 window.addEventListener('load', function() {
-
-  // Checking if Web3 has been injected by the browser (Mist/MetaMask)
-  if (typeof web3 !== 'undefined') {
-    // Use Mist/MetaMask's provider
-    window.web3 = new Web3(web3.currentProvider);
-  } else {
-    console.log('No web3? You should consider trying MetaMask!')
-    // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-    window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-  }
-
-  // Now you can start your app & access web3 freely:
-  startApp()
-
+    waitForWeb3();
 });
