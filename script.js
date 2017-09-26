@@ -439,6 +439,62 @@ $(function(){
         });
 	}
 
+    var set_up_player_board = function() {
+        for (var x = 0; x < 19; x++) {
+            for (var y = 0; y < 19; y++) {
+                player_board[x][y] = 0;
+            }
+        }
+        for (var i = 0; i < my_moves.length; i++) {
+            player_board[my_moves[i].x][my_moves[i].y] = turn;
+        }
+    }
+
+    var check_direction = function(x, y, dir) {
+        if (board_state[x][y] + player_board[x][y] == 0) {
+            return 0;
+        }
+        var dx = 0;
+        var dy = 0;
+        if (dir == 3) {
+            if (x < 5 || y > 19 - 6) return 0;
+            dx = -1;
+            dy = 1;
+        } else if (dir == 2) {
+            if (x > 19 - 6 || y > 19 - 6) return 0;
+            dx = 1;
+            dy = 1;
+        } else if (dir == 1) {
+            if (y > 19 - 6) return 0;
+            dy = 1;
+        } else {
+            if (x > 19 - 6) return 0;
+            dx = 1;
+        }
+        for (var i = 0; i < 6; i++) {
+            if (player_board[x][y] + board_state[x][y] !=
+                    player_board[x + i * dx][y + i * dy] + board_state[x + i * dx][y + i * dy]) {
+                return 0;
+            }
+        }
+        return board_state[x][y] + player_board[x][y];
+    }
+
+    var find_winner = function() {
+        // returns {x, y, dir}
+        set_up_player_board();
+        for (var x = 0; x < 19; x++) {
+            for (var y = 0; y < 19; y++) {
+                for (var dir = 0; dir < 4; dir++) {
+                    if (check_direction(x, y, dir) == turn) {
+                        return {x:x, y:y, dir:dir};
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     // BUTTONS
     $('#game_tab').click(function (e) {
         e.preventDefault()
