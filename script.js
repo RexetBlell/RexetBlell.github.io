@@ -575,7 +575,6 @@ $(function(){
 
 var web3_attempts = 10;
 function waitForWeb3() {
-    alert(web3_attempts);
     if (typeof web3 !== "undefined") {
         // Use Mist/MetaMask's provider
         window.web3 = new Web3(web3.currentProvider);
