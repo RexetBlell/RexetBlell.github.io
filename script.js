@@ -112,6 +112,8 @@ $(function(){
                 board_state[x][y] = 0;
             }
         }
+        // temp fix
+        board_state[9][9] = 1;
 		connectsix.move_history(current_game_num, function(error, result) {
             move_history = result;
             if (move_history.length > 0) {
