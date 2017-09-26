@@ -16,6 +16,8 @@ $(function(){
     var time_per_move;
     var player_1;
     var player_2;
+    var player_1_stake;
+    var player_2_stake;
     var winner;
     var x1, y1, x2, y2;
 
@@ -67,7 +69,7 @@ $(function(){
         });
     }
 
-    var refresh_all = function(callback) {
+    var refresh_game_object = function(callback) {
         var cur_refresh_index = 0;
         var output = [];
 
@@ -92,7 +94,7 @@ $(function(){
         }
 
         var refresh_games = function() {
-            if (cur_refresh_index == 3 || output.length > 0 && output[output.length - 1].player_1 == "0x") {
+            if (output.length > 0 && output[output.length - 1].player_1 == "0x") {
                 output.pop();
                 callback(null, output);
             } else {
@@ -366,6 +368,168 @@ $(function(){
 		}
 	}
 
+    var refresh_all_games = function() {
+        refresh_game_object(function(error, result) {
+            $('#games_table').find("tr:gt(0)").remove();
+            for (var i = 0; i < result.length; i++) {
+                game_metadata = result[i];
+                if ($('#only_active').prop('checked') && get_game_status(game_metadata) == "finished") {
+                    continue;
+                }
+                var game_status = get_game_status(game_metadata);
+                if (game_status == "finished") {
+                    row = "<td>" + '<button type="button" class="btn btn-danger">' + i + "</button>" + "</td>";
+                } else if (game_status == "waiting") {
+                    row = "<td>" + '<button type="button" class="btn btn-success">' + i + "</button>" + "</td>";
+                } else {
+                    row = "<td>" + '<button type="button" class="btn btn-primary">' + i + "</button>" + "</td>";
+                }
+
+                var p1 = game_metadata.player_1;
+                var p2 = game_metadata.player_2;
+                var p1_stake = web3.fromWei(game_metadata.p1_stake, "ether");
+                var p2_stake = web3.fromWei(game_metadata.p2_stake, "ether");
+
+                row += "<td>" + formatTime(game_metadata.time_per_move * 1000) + "</td>" // time per move
+                row += "<td>" + p1 + "</td>"
+                row += "<td>" + p1_stake + "</td>"
+                row += "<td>" + p2 + "</td>"
+                row += "<td>" + p2_stake + "</td>"
+                $('#games_table tbody').append("<tr>" + row + "</tr>");
+
+                $('#games_table').on('click', 'tr button', function (event) {
+                    $("#game_tab").tab('show')
+                    current_game_num = $(this).text();
+                    sync_state();
+                    board.setWidth($("#board").width());
+                });
+
+            }
+        });
+    }
+    refresh_all_games();
+
+    board.addEventListener("click", function(x, y) {
+        mode = "normal";
+        if (my_moves.length >= 2
+                || (my_moves.length == 1 && my_moves[0].x == x && my_moves[0].y == y)
+                || board_state[x][y] != 0) {
+            my_moves = [];
+        } else {
+            my_moves.push({x:x, y:y});
+        }
+        refresh();
+    });
+
+    var check_accounts = function() {
+		if (web3.eth.accounts.length < 1) {
+			alert ("Make sure 1 Ethereum account is selected.");
+		}
+    }
+
+	var register_account = function(username) {
+		registry.get_address(username, function(error, result) {
+            if (result == "0x0000000000000000000000000000000000000000") {
+                registry.register(username, {from: web3.eth.accounts[0]}, function(error, result) { });
+            } else {
+			alert("Username taken");
+            }
+        });
+	}
+
+    // BUTTONS
+    $('#game_tab').click(function (e) {
+        e.preventDefault()
+        $(this).tab('show')
+        board.setWidth($("#board").width());
+    })
+
+    // LOBBY VIEW
+
+    // Host Game
+	$("#btn_host_game").click(function(){
+		check_accounts();
+		$("#newGameModal").modal('show');
+	});
+
+    $("#btn_start").click(function(){
+        var sec_per_move = $("#time_init").val();
+        var p1_stk = web3.toWei($("#p1_stake").val(), "ether");
+        var p2_stk = web3.toWei($("#p2_stake").val(), "ether");
+        connectsix.new_game(sec_per_move, p2_stk, {from: web3.eth.accounts[0], value: p1_stk}, function(error, result) {
+            $("#newGameModal").modal('hide');
+            if (error) {
+                alert(error);
+            } else {
+                alert("Create game transaction is sent. Refresh the list in a few seconds");
+            }
+        });
+    });
+
+    // Select Username
+    $("#btn_open_register").click(function(){
+        $("#registerModal").modal('show');
+    });
+
+    $("#btn_register").click(function(){
+        check_accounts();
+        register_account($("#username_inp").val());
+        $("#registerModal").modal('hide');
+    });
+
+
+    // Refresh
+    $("#btn_refresh").click(function(){
+		refresh_all_games();
+    });
+
+    // GAME VIEW
+
+    // Make move
+    $("#btn_make_move").click(function(){
+		check_accounts();
+		if (my_moves.length == 2) {
+			w = find_winner();
+			if (w == false) {
+				connectsix.make_move(
+                        current_game_num, my_moves[0].x, my_moves[0].y, my_moves[1].x, my_moves[1].y,
+				        {from: web3.eth.accounts[0]}, function(error, result) { });
+			} else {
+                connectsix.make_move_and_claim_victory(
+                current_game_num,
+                my_moves[0].x,
+                my_moves[0].y,
+                my_moves[1].x,
+                my_moves[1].y,
+                w.x,
+                w.y,
+                w.dir,
+                {from: web3.eth.accounts[0]}, function(error, result) { });
+			}
+		}
+	});
+
+    // Join this game
+	$("#btn_join").click(function() {
+		check_accounts();
+		if (player_2_stake != 0) {
+			alert("Warning: you are about to send Ether because this game is for money.");
+		}
+		if (turn == 0) {
+			connectsix.join_game(current_game_num, {from: web3.eth.accounts[0], value: player_2_stake}, function(error, result) {});
+		}
+	});
+
+    // Claim time victory
+	$("#btn_time_victory").click(function() {
+		check_accounts();
+		if (deadline * 1000 - Date.now() > 0) {
+			alert("Your opponent still has some time left.");
+		} else {
+			connectsix.claim_time_victory(current_game_num, {from: web3.eth.accounts[0]}, function(error, result) { });
+		}
+	});
+
     $("#btn_history_start").click(function(){
         if (mode == "normal") {
             mode = "replay";
@@ -403,88 +567,6 @@ $(function(){
         }
         history_move_num = move_history.length / 4;
         draw_history();
-    });
-
-    var get_player_names = function(game_num) {
-
-    }
-
-    refresh_all(function(error, result) {
-        $('#games_table').find("tr:gt(0)").remove();
-        for (var i = 0; i < result.length; i++) {
-            game_metadata = result[i];
-
-			var game_status = get_game_status(game_metadata);
-            if (game_status == "finished") {
-                row = "<td>" + '<button type="button" class="btn btn-danger">' + i + "</button>" + "</td>";
-            } else if (game_status == "waiting") {
-                row = "<td>" + '<button type="button" class="btn btn-success">' + i + "</button>" + "</td>";
-            } else {
-                row = "<td>" + '<button type="button" class="btn btn-primary">' + i + "</button>" + "</td>";
-            }
-
-            var p1 = game_metadata.player_1;
-            var p2 = game_metadata.player_2;
-            var p1_stake = web3.fromWei(game_metadata.p1_stake, "ether");
-            var p2_stake = web3.fromWei(game_metadata.p2_stake, "ether");
-
-            row += "<td>" + formatTime(game_metadata.time_per_move * 1000) + "</td>" // time per move
-            row += "<td>" + p1 + "</td>"
-            row += "<td>" + p1_stake + "</td>"
-            row += "<td>" + p2 + "</td>"
-            row += "<td>" + p2_stake + "</td>"
-            $('#games_table tbody').append("<tr>" + row + "</tr>");
-
-			$('#games_table').on('click', 'tr button', function (event) {
-				$("#game_tab").tab('show')
-				current_game_num = $(this).text();
-				sync_state();
-				board.setWidth($("#board").width());
-			});
-
-        }
-    });
-
-    board.addEventListener("click", function(x, y) {
-        mode = "normal";
-        if (my_moves.length >= 2
-                || (my_moves.length == 1 && my_moves[0].x == x && my_moves[0].y == y)
-                || board_state[x][y] != 0) {
-            my_moves = [];
-        } else {
-            my_moves.push({x:x, y:y});
-        }
-        refresh();
-    });
-
-    var check_accounts = function() {
-		if (web3.eth.accounts.length < 1) {
-			alert ("Make sure 1 Ethereum account is selected.");
-		}
-    }
-
-	var register_account = function(username) {
-		registry.get_address(username, function(error, result) {
-            if (result == "0x0000000000000000000000000000000000000000") {
-                registry.register(username, {from: web3.eth.accounts[0]}, function(error, result) { });
-            } else {
-			alert("Username taken");
-            }
-        });
-	}
-
-    // BUTTONS
-
-    // registration
-
-    $("#btn_open_register").click(function(){
-        $("#registerModal").modal('show');
-    });
-
-    $("#btn_register").click(function(){
-        check_accounts();
-        register_account($("#username_inp").val());
-        $("#registerModal").modal('hide');
     });
 
 });
