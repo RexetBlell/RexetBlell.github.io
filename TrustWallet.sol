@@ -40,6 +40,7 @@ contract TrustWallet {
     
     mapping (uint => Transaction) public transactions;
     mapping (address => User) public users;
+    address[] public userAddresses;
     uint public transactionCount;
     
     modifier onlyActiveUsersAllowed() {
@@ -49,12 +50,12 @@ contract TrustWallet {
     }
     
     modifier transactionMustBePending() {
-        require(!isTransactionPending());
+        require(isTransactionPending());
         _;
     }
     
-    modifier transctionMustNotBePending() {
-        require(isTransactionPending());
+    modifier transactionMustNotBePending() {
+        require(!isTransactionPending());
         _;
     }
     
@@ -73,9 +74,15 @@ contract TrustWallet {
     
     // Constructor. Creates the first user.
     function TrustWallet(address first_user) public {
-        users[first_user].is_active = true;
-        users[first_user].time_added = now;
-        users[first_user].waiting_time = 0;
+        users[first_user] = User({
+            waiting_time: 0,
+            is_active: true,
+            is_removed: false,
+            time_added: now,
+            parent: 0x0,
+            time_added_another_user: now
+        });
+        userAddresses.push(first_user);
     }
     
     function () public payable {}
@@ -84,7 +91,7 @@ contract TrustWallet {
     function initiateTransaction(address _destination, uint _value, bytes _data)
         public
         onlyActiveUsersAllowed()
-        transactionMustBePending()
+        transactionMustNotBePending()
     {
         transactions[transactionCount] = Transaction({
             destination: _destination,
@@ -157,6 +164,7 @@ contract TrustWallet {
             // able to add a new user.
             time_added_another_user: now
         });
+        userAddresses.push(new_user);
     }
     
     // Removes a user. The sender must have a lower or equal waiting_time
@@ -177,12 +185,9 @@ contract TrustWallet {
 }
 
 contract TrustWalletFactory {
-    mapping (uint => TrustWallet) public wallets;
-    uint public num_wallets;
+    mapping (address => TrustWallet[]) public wallets;
     
-    function createWallet(address first_user) public returns (address) {
-        wallets[num_wallets] = new TrustWallet(first_user);
-        num_wallets += 1;
-        return address(wallets[num_wallets - 1]);
+    function createWallet() public {
+        wallets[msg.sender].push(new TrustWallet(msg.sender));
     }
 }
