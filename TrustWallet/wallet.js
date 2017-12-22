@@ -1,245 +1,11 @@
-var getTrustWallet = function(web3, address) {
-
-    var contractABI = [{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "_destination",
-				"type": "address"
-			},
-			{
-				"name": "_value",
-				"type": "uint256"
-			},
-			{
-				"name": "_data",
-				"type": "bytes"
-			}
-		],
-		"name": "initiateTransaction",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "userAddresses",
-		"outputs": [
-			{
-				"name": "",
-				"type": "address"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [],
-		"name": "cancelTransaction",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "userAddr",
-				"type": "address"
-			}
-		],
-		"name": "removeUser",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "transactions",
-		"outputs": [
-			{
-				"name": "destination",
-				"type": "address"
-			},
-			{
-				"name": "value",
-				"type": "uint256"
-			},
-			{
-				"name": "data",
-				"type": "bytes"
-			},
-			{
-				"name": "initiator",
-				"type": "address"
-			},
-			{
-				"name": "time_initiated",
-				"type": "uint256"
-			},
-			{
-				"name": "time_finalized",
-				"type": "uint256"
-			},
-			{
-				"name": "is_executed",
-				"type": "bool"
-			},
-			{
-				"name": "is_canceled",
-				"type": "bool"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [],
-		"name": "finalizeTransaction",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "users",
-		"outputs": [
-			{
-				"name": "waiting_time",
-				"type": "uint256"
-			},
-			{
-				"name": "is_active",
-				"type": "bool"
-			},
-			{
-				"name": "is_removed",
-				"type": "bool"
-			},
-			{
-				"name": "time_added",
-				"type": "uint256"
-			},
-			{
-				"name": "parent",
-				"type": "address"
-			},
-			{
-				"name": "time_added_another_user",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "balance",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "transactionCount",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "new_user",
-				"type": "address"
-			},
-			{
-				"name": "new_user_time",
-				"type": "uint256"
-			}
-		],
-		"name": "addUser",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "isTransactionPending",
-		"outputs": [
-			{
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"name": "first_user",
-				"type": "address"
-			}
-		],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"payable": true,
-		"stateMutability": "payable",
-		"type": "fallback"
-	}];
-
-    var abstract_contract = web3.eth.contract(contractABI);
-    var specific_contract = abstract_contract.at(address);
-
-    return specific_contract;
+function getParameterByName(name) {
+    var url = window.location.href;
+    var name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
 var constructTransaction = function(title, transactionContent) {
@@ -252,10 +18,13 @@ var constructTransaction = function(title, transactionContent) {
     var is_executed = transactionContent[6];
     var is_canceled = transactionContent[7];
 
-    buttons = "";
+    var buttons = '';
+    if (!is_executed && !is_canceled) {
+        buttons += '<button type="button" class="btn btn-default" id="btn_finalize_transaction">Finalize Transaction</button>';
+        buttons += '<button type="button" class="btn btn-default" id="btn_cancel_transaction">Cancel Transaction</button>';
+    }
 
-    list_items = "";
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Destination</h4> <p class="list-group-item-text">' + destination + '</p></div>';
+    var list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Destination</h4> <p class="list-group-item-text">' + destination + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Value</h4> <p class="list-group-item-text">' + value + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Data</h4> <p class="list-group-item-text">' + data + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Initiator</h4> <p class="list-group-item-text">' + initiator + '</p></div>';
@@ -263,60 +32,104 @@ var constructTransaction = function(title, transactionContent) {
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Finalized</h4> <p class="list-group-item-text">' + time_finalized + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Is Executed</h4> <p class="list-group-item-text">' + is_executed + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Is Canceled</h4> <p class="list-group-item-text">' + is_canceled + '</p></div>';
-    return '<div class="panel panel-default"> <div class="panel-heading">' + title + '</div> <div class="panel-body"> <div class="list-group">' + list_items + '</div>' + buttons + '</div> </div>';
-}
 
-var constructUser = function(title, userContent) {
-    var waiting_time = userContent[0];
-    var is_active = userContent[1];
-    var is_removed = userContent[2];
-    var time_added = userContent[3];
-    var user_parent = userContent[4];
-    var time_added_another_user = userContent[5];
-
-    list_items = "";
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Waiting Time</h4> <p class="list-group-item-text">' + waiting_time + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Is Active</h4> <p class="list-group-item-text">' + is_active + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Is Removed</h4> <p class="list-group-item-text">' + is_removed + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Added</h4> <p class="list-group-item-text">' + time_added + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">User Parent</h4> <p class="list-group-item-text">' + user_parent + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time added another user</h4> <p class="list-group-item-text">' + time_added_another_user + '</p></div>';
-    return '<div class="panel panel-default"> <div class="panel-heading">' + title + '</div> <div class="panel-body"> <div class="list-group">' + list_items + '</div> </div> </div>';
-}
-
-var refreshTransactions = function(index, newest) {
-    if (index >= 0) {
-        wallet.transactions(index, function(error, result) {
-            $("#panel_transactions").append(constructTransaction("Tx: " + index, result));
-            refreshTransactions(index - 1, false);
-        });
+    var panel_type = "primary";
+    if (is_executed) {
+        panel_type = "success";
+    } else if (is_canceled) {
+        panel_type = "danger";
     }
+
+    return '<div class="panel panel-' + panel_type + '"> <div class="panel-heading">' + title + '</div> <div class="panel-body"> <div class="list-group">' + list_items + '</div>' + buttons + '</div> </div>';
 }
 
-var refreshUsers = function(index) {
-    if (index < 2) {
-        wallet.userAddresses(index, function(error, user_address) {
-            if (user_address != "0x") {
-                wallet.users(user_address, function(error, result) {
-                    $("#panel_users").append(constructUser("User: " + user_address, result));
-                    refreshUsers(index + 1);
-                });
-            }
-        });
+var constructUserObject = function(address, userContent) {
+    var obj = {
+        address: address,
+        waiting_time: userContent[0],
+        is_active: userContent[1],
+        is_removed: userContent[2],
+        time_added: userContent[3],
+        user_parent: userContent[4],
+        time_added_another_user: userContent[5]
+    };
+    return obj;
+}
+
+var constructUserHtml = function(obj) {
+
+    var buttons = '<button type="button" class="btn btn-default remove-user" address="' + obj.address + '">Remove</button>';
+
+    list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Waiting Time</h4> <p class="list-group-item-text">' + obj.waiting_time + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Is Active</h4> <p class="list-group-item-text">' + obj.is_active + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Is Removed</h4> <p class="list-group-item-text">' + obj.is_removed + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Added</h4> <p class="list-group-item-text">' + obj.time_added + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">User Parent</h4> <p class="list-group-item-text">' + obj.user_parent + '</p></div>';
+    //alert("added: " + obj.time_added);
+    //alert("waiting_time: " + obj.waiting_time);
+    //alert("now: " + Date.now() / 1000);
+    //alert("Time Until: " + time_until);
+    var time_until = Math.round(Math.max(0, obj.time_added - (Date.now() / 1000) + obj.waiting_time));
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Until Can Add User</h4> <p class="list-group-item-text">' + time_until + '</p></div>';
+
+    var panel_type = "primary";
+    if (obj.is_removed) {
+        var panel_type = "danger";
     }
+
+    return '<div class="panel panel-' + panel_type + '"> <div class="panel-heading">User: ' + obj.address + '</div> <div class="panel-body"> <div class="list-group">' + list_items + '</div>' + buttons + '</div> </div>';
 }
 
 var startApp = function(web3) {
 
-    wallet_address = "0x63084d49868085e059df77c06f94d64fc47e3473"; // change this
-    wallet = getTrustWallet(web3, wallet_address);
+    var wallet_address = getParameterByName("wallet_address");
+    var wallet = getTrustWallet(web3, wallet_address);
+
+
+    var refreshTransactions = function(index, newest) {
+        if (index >= 0) {
+            wallet.transactions(index, function(error, result) {
+                $("#panel_transactions").append(constructTransaction("Tx: " + index, result));
+                refreshTransactions(index - 1, false);
+            });
+        }
+    }
+
+    var compare_users = function(a, b) {
+        return a.waiting_time - b.waiting_time;
+    }
+
+    var refreshUsers = function(index, users) {
+        wallet.userAddresses(index, function(error, user_address) {
+            if (user_address == "0x") {
+                users.sort(compare_users);
+                for (var i=0; i < users.length; i++) {
+                    $("#panel_users").append(constructUserHtml(users[i]));
+                }
+            } else {
+                wallet.users(user_address, function(error, result) {
+                    users.push(constructUserObject(user_address, result));
+                    refreshUsers(index + 1, users);
+                });
+            }
+
+        });
+    }
 
     var refresh = function(wallet) {
+        $("#panel_transactions").empty();
+        $("#panel_users").empty();
+        $("#out_user_address").text("User Address: " + web3.eth.accounts[0]);
+        $("#out_wallet_address").text("Wallet Address: " + wallet_address);
+        wallet.balance(function(error, result) {
+            $("#out_balance").text("Balance: " + result);
+        });
 
         wallet.transactionCount(function(error, result) {
+            $("#out_transaction_count").text("Transaction Count: " + result);
             refreshTransactions(result - 1, true);
         });
-        refreshUsers(0);
+        refreshUsers(0, []);
     }
 
    	$("#btn_initiate_transaction").click(function() {
@@ -329,18 +142,40 @@ var startApp = function(web3) {
         });
     });
 
-    $("#btn_finalize_transaction").click(function() {
-        wallet.finalizeTransaction({from: web3.eth.accounts[0]}, function(error, result) {
-            alert("finalize transaction sent");
+   	$("#btn_add_user").click(function() {
+        var user_address = $("#inp_new_user_address").val();
+        var waiting_time = $("#inp_new_user_waiting_time").val();
+        wallet.addUser(user_address, waiting_time, {from: web3.eth.accounts[0]}, function(error, result) {
+            alert("add user transaction sent");
             alert(result);
         });
     });
 
-    $("#btn_cancel_transaction").click(function() {
-        wallet.cancelTransaction({from: web3.eth.accounts[0]}, function(error, result) {
-            alert("cancel transaction sent");
+    $('body').on('click', 'button.btn', function() {
+        if ($(this).attr('id') == 'btn_finalize_transaction') {
+            wallet.finalizeTransaction({from: web3.eth.accounts[0]}, function(error, result) {
+                alert("finalize transaction sent");
+                alert(result);
+            });
+        } else if ($(this).attr('id') == 'btn_cancel_transaction') {
+            wallet.cancelTransaction({from: web3.eth.accounts[0]}, function(error, result) {
+                alert("cancel transaction sent");
+                alert(result);
+            });
+        }
+    });
+
+    $('body').on('click', 'button.remove-user', function() {
+        var user_address = $(this).attr('address');
+        alert(user_address);
+        wallet.removeUser(user_address, {from: web3.eth.accounts[0]}, function(error, result) {
+            alert(error);
             alert(result);
         });
+    });
+
+    $("#btn_refresh").click(function() {
+        refresh(wallet);
     });
 
     refresh(wallet);

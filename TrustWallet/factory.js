@@ -1,71 +1,40 @@
-var getTrustWalletFactory = function(web3) {
+var constructWallet = function(wallet_address) {
+    var button = '<a href="/wallet.html?wallet_address=' + wallet_address + '" type="button" class="btn btn-default btn-block btn-lg">' + wallet_address + '</a>';
+    return button;
+}
 
-    var contractABI = [
-	{
-		"constant": false,
-		"inputs": [],
-		"name": "createWallet",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "",
-				"type": "address"
-			},
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "wallets",
-		"outputs": [
-			{
-				"name": "",
-				"type": "address"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	}];
+var addWallet = function(index, trustWalletFactory) {
 
-    var address = "0x909b83bCaA261e5e025A8fA9E893366A8e9c1e99";
-    var abstract_contract = web3.eth.contract(contractABI);
-    var specific_contract = abstract_contract.at(address);
+    trustWalletFactory.wallets(web3.eth.accounts[0], index, function(error, wallet_address) {
+        if (wallet_address != "0x") {
+            $("#panel_wallets").append(constructWallet(wallet_address));
+            addWallet(index + 1, trustWalletFactory)
+        } else if (index == 0) {
+            $("#panel_wallets").append("<h4>No wallets were created by this address</h4>");
+        }
+    });
 
-    return specific_contract;
 }
 
 var startApp = function(web3) {
 
-    trustWalletFactory = getTrustWalletFactory(web3);
-    /*
-    trustWalletFactory.num_wallets(function(error, result) {
-        alert(result);
-    });
-    */
+    var trustWalletFactory = getTrustWalletFactory(web3);
 
     $("#btn_create_wallet").click(function() {
         trustWalletFactory.createWallet(function(error, result) {
-            alert(web3.eth.getTransactionReceipt(result, function(error, result) {
-                alert(error);
+            web3.eth.getTransactionReceipt(result, function(error, result) {
                 alert(result);
-            }));
+            });
         });
     });
 
-    $("#btn_get_wallet").click(function() {
-        trustWalletFactory.wallets(web3.eth.accounts[0], 0, function(error, result) {
-            alert(result);
-        });
-    });
+    var refresh = function() {
+        $("#panel_wallets").empty();
+        $("#panel_wallets_title").text("Wallets created by " + web3.eth.accounts[0]);
+        addWallet(0, trustWalletFactory);
+    }
 
-
+    setInterval(refresh, 1000);
 }
 
 $(function() {
@@ -83,12 +52,5 @@ $(function() {
         }
     }
 
-    /*
-    function startApp(web3) {
-        alert("nice, app started");
-    }
-    */
-
     getWeb3(startApp);
-
 });
