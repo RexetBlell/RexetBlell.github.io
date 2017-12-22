@@ -1,5 +1,5 @@
 var constructWallet = function(wallet_address) {
-    var button = '<a href="/wallet.html?wallet_address=' + wallet_address + '" type="button" class="btn btn-default btn-block btn-lg">' + wallet_address + '</a>';
+    var button = '<a href="wallet.html?wallet_address=' + wallet_address + '" type="button" class="btn btn-default btn-block btn-lg">' + wallet_address + '</a>';
     return button;
 }
 
@@ -34,7 +34,8 @@ var startApp = function(web3) {
         addWallet(0, trustWalletFactory);
     }
 
-    setInterval(refresh, 1000);
+    refresh();
+    setInterval(refresh, 5000);
 }
 
 $(function() {
