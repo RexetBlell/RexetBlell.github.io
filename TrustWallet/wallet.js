@@ -1,3 +1,4 @@
+var date_format = "MMMM DD YYYY, HH:mm:ss";
 function getParameterByName(name) {
     var url = window.location.href;
     var name = name.replace(/[\[\]]/g, "\\$&");
@@ -13,8 +14,8 @@ var constructTransaction = function(title, transactionContent) {
     var value = transactionContent[1];
     var data = transactionContent[2];
     var initiator = transactionContent[3];
-    var time_initiated = transactionContent[4];
-    var time_finalized = transactionContent[5];
+    var time_initiated = moment.unix(transactionContent[4]).format(date_format);
+    var time_finalized = moment.unix(transactionContent[5]).format(date_format);
     var finalized_by = transactionContent[6];
     var is_executed = transactionContent[7];
     var is_canceled = transactionContent[8];
@@ -51,9 +52,9 @@ var constructUserObject = function(address, userContent) {
         waiting_time: userContent[0],
         is_active: userContent[1],
         is_removed: userContent[2],
-        time_added: userContent[3],
+        time_added: moment.unix(userContent[3]).format(date_format),
         user_parent: userContent[4],
-        time_added_another_user: userContent[5]
+        time_added_another_user: userContent[5] // TODO: deal with this nicer
     };
     return obj;
 }
@@ -61,8 +62,7 @@ var constructUserObject = function(address, userContent) {
 var constructUserHtml = function(obj) {
 
     var buttons = '<button type="button" class="btn btn-default remove-user" address="' + obj.address + '">Remove</button>';
-
-    list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Waiting Time</h4> <p class="list-group-item-text">' + obj.waiting_time + '</p></div>';
+    var list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Waiting Time</h4> <p class="list-group-item-text">' + moment.duration(obj.waiting_time.toNumber(), "seconds").humanize() + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Is Active</h4> <p class="list-group-item-text">' + obj.is_active + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Is Removed</h4> <p class="list-group-item-text">' + obj.is_removed + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Added</h4> <p class="list-group-item-text">' + obj.time_added + '</p></div>';
@@ -71,6 +71,7 @@ var constructUserHtml = function(obj) {
     //alert("waiting_time: " + obj.waiting_time);
     //alert("now: " + Date.now() / 1000);
     //alert("Time Until: " + time_until);
+    // TODO: rework this
     var time_until = Math.round(Math.max(0, obj.time_added - (Date.now() / 1000) + obj.waiting_time));
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Until Can Add User</h4> <p class="list-group-item-text">' + time_until + '</p></div>';
 
@@ -146,7 +147,7 @@ var startApp = function(web3) {
 
    	$("#btn_add_user").click(function() {
         var user_address = $("#inp_new_user_address").val();
-        var waiting_time = $("#inp_new_user_waiting_time").val();
+        var waiting_time = $("#inp_new_user_waiting_time").val(); // TODO: make specifying this easier
         wallet.addUser(user_address, waiting_time, {from: web3.eth.accounts[0]}, function(error, result) {
             alert("add user transaction sent");
             alert(result);
