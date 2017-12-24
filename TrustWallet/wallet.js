@@ -15,8 +15,9 @@ var constructTransaction = function(title, transactionContent) {
     var initiator = transactionContent[3];
     var time_initiated = transactionContent[4];
     var time_finalized = transactionContent[5];
-    var is_executed = transactionContent[6];
-    var is_canceled = transactionContent[7];
+    var finalized_by = transactionContent[6];
+    var is_executed = transactionContent[7];
+    var is_canceled = transactionContent[8];
 
     var buttons = '';
     if (!is_executed && !is_canceled) {
@@ -30,6 +31,7 @@ var constructTransaction = function(title, transactionContent) {
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Initiator</h4> <p class="list-group-item-text">' + initiator + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Initiated</h4> <p class="list-group-item-text">' + time_initiated + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Finalized</h4> <p class="list-group-item-text">' + time_finalized + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Finalized By</h4> <p class="list-group-item-text">' + finalized_by + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Is Executed</h4> <p class="list-group-item-text">' + is_executed + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Is Canceled</h4> <p class="list-group-item-text">' + is_canceled + '</p></div>';
 
