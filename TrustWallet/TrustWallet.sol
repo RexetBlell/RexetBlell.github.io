@@ -31,6 +31,8 @@ contract TrustWallet {
         uint time_initiated;
         // When this transaction was executed or canceled.
         uint time_finalized;
+        // User that finalized this transaction
+        address finalized_by;
         
         // True if this trasaction was executed.
         bool is_executed;
@@ -100,6 +102,7 @@ contract TrustWallet {
             initiator: msg.sender,
             time_initiated: now,
             time_finalized: 0,
+            finalized_by: 0x0,
             is_executed: false,
             is_canceled: false
         });
@@ -118,6 +121,7 @@ contract TrustWallet {
         require(now > transaction.time_initiated + users[transaction.initiator].waiting_time);
         transaction.is_executed = true;
         transaction.time_finalized = now;
+        transaction.finalized_by = msg.sender;
         transaction.destination.call.value(transaction.value)(transaction.data);
     }
     
@@ -136,6 +140,7 @@ contract TrustWallet {
             users[transaction.initiator].waiting_time);
         transaction.is_canceled = true;
         transaction.time_finalized = now;
+        transaction.finalized_by = msg.sender;
     }
     
     // Adds a user to the wallet. The waiting time of the new user must
