@@ -21,9 +21,12 @@
             <h4 id="out_wallet_address"></h4>
             <h4 id="out_balance"></h4>
             <h4 id="out_transaction_count"></h4>
-            <h4 id="out_user_address"></h4>
             <button type="button" class="btn btn-default" id="btn_refresh">Refresh</button>
           </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading" id="panel_current_user_heading"></div>
+          <div class="panel-body" id="panel_current_user"> </div>
         </div>
       </div>
       <div class="col-md-12">
@@ -79,8 +82,12 @@
 
         <div class="col-md-6">
           <div class="panel panel-default">
-            <div class="panel-heading">Users</div>
+            <div class="panel-heading">Active Users</div>
             <div class="panel-body" id="panel_users"> </div>
+          </div>
+          <div class="panel panel-default">
+            <div class="panel-heading">Removed Users</div>
+            <div class="panel-body" id="panel_removed_users"> </div>
           </div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 var date_format = "MMMM DD YYYY, HH:mm:ss";
+
 function getParameterByName(name) {
     var url = window.location.href;
     var name = name.replace(/[\[\]]/g, "\\$&");
@@ -52,34 +53,43 @@ var constructUserObject = function(address, userContent) {
         waiting_time: userContent[0],
         is_active: userContent[1],
         is_removed: userContent[2],
-        time_added: moment.unix(userContent[3]).format(date_format),
+        //time_added: moment.unix(userContent[3]).format(date_format),
+        time_added: userContent[3],
         user_parent: userContent[4],
         time_added_another_user: userContent[5] // TODO: deal with this nicer
     };
     return obj;
 }
 
-var constructUserHtml = function(obj) {
-
+var constructUserHtml = function(obj, state) {
     var buttons = '<button type="button" class="btn btn-default remove-user" address="' + obj.address + '">Remove</button>';
-    var list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Waiting Time</h4> <p class="list-group-item-text">' + moment.duration(obj.waiting_time.toNumber(), "seconds").humanize() + '</p></div>';
+    if (state == "cur_user") {
+        buttons = '<button type="button" class="btn btn-default remove-user" address="' + obj.address + '">Remove Self</button>';
+    }
+    var waiting_time_str;
+    if (obj.waiting_time < 60) {
+        waiting_time_str = obj.waiting_time + " seconds";
+    } else {
+        waiting_time_str = 'Around ' + moment.duration(obj.waiting_time.toNumber(), "seconds").humanize() + ' (' + obj.waiting_time + ' seconds)</p></div>';
+    }
+    var list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Waiting Time</h4> <p class="list-group-item-text">' + waiting_time_str + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Is Active</h4> <p class="list-group-item-text">' + obj.is_active + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Is Removed</h4> <p class="list-group-item-text">' + obj.is_removed + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Added</h4> <p class="list-group-item-text">' + obj.time_added + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Added</h4> <p class="list-group-item-text">' + moment.unix(obj.time_added.toNumber()).format(date_format) + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">User Parent</h4> <p class="list-group-item-text">' + obj.user_parent + '</p></div>';
-    //alert("added: " + obj.time_added);
-    //alert("waiting_time: " + obj.waiting_time);
-    //alert("now: " + Date.now() / 1000);
-    //alert("Time Until: " + time_until);
-    // TODO: rework this
     var time_until = Math.round(Math.max(0, obj.time_added - (Date.now() / 1000) + obj.waiting_time));
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Until Can Add User</h4> <p class="list-group-item-text">' + time_until + '</p></div>';
 
     var panel_type = "primary";
     if (obj.is_removed) {
-        var panel_type = "danger";
+        panel_type = "danger";
+    } else if (state == "weaker") {
+        panel_type = "info";
     }
 
+    if (state == "cur_user") {
+        return '<div class="list-group">' + list_items + '</div>' + buttons;
+    }
     return '<div class="panel panel-' + panel_type + '"> <div class="panel-heading">User: ' + obj.address + '</div> <div class="panel-body"> <div class="list-group">' + list_items + '</div>' + buttons + '</div> </div>';
 }
 
@@ -106,8 +116,29 @@ var startApp = function(web3) {
         wallet.userAddresses(index, function(error, user_address) {
             if (user_address == "0x") {
                 users.sort(compare_users);
-                for (var i=0; i < users.length; i++) {
-                    $("#panel_users").append(constructUserHtml(users[i]));
+                var cur_user = null;
+                for (var i = 0; i < users.length; i++) {
+                    // find the current user
+                    if (users[i].address == web3.eth.accounts[0]) cur_user = users[i];
+                }
+                $("#panel_current_user_heading").text("Current User Address: " + web3.eth.accounts[0]);
+                if (cur_user == null) {
+                    $("#panel_current_user").append("<h4>User Not Found</h4>");
+                    for (var i = 0; i < users.length; i++) {
+                        $("#panel_users").append(constructUserHtml(users[i], "stronger"));
+                    }
+                } else {
+                    for (var i = 0; i < users.length; i++) {
+                        if (users[i].address == cur_user.address) {
+                            $("#panel_current_user").append(constructUserHtml(users[i], "cur_user"));
+                        } else if (users[i].is_removed) {
+                            $("#panel_removed_users").append(constructUserHtml(users[i]));
+                        } else if (users[i].waiting_time < cur_user.waiting_time) {
+                            $("#panel_users").append(constructUserHtml(users[i], "stronger"));
+                        } else {
+                            $("#panel_users").append(constructUserHtml(users[i], "weaker"));
+                        }
+                    }
                 }
             } else {
                 wallet.users(user_address, function(error, result) {
@@ -122,7 +153,6 @@ var startApp = function(web3) {
     var refresh = function(wallet) {
         $("#panel_transactions").empty();
         $("#panel_users").empty();
-        $("#out_user_address").text("User Address: " + web3.eth.accounts[0]);
         $("#out_wallet_address").text("Wallet Address: " + wallet_address);
         wallet.balance(function(error, result) {
             $("#out_balance").text("Balance: " + result);
@@ -140,7 +170,6 @@ var startApp = function(web3) {
         var val = $("#inp_value").val();
         var data = $("#inp_data").val();
         wallet.initiateTransaction(dest, val, data, {from: web3.eth.accounts[0]}, function(error, result) {
-            alert("create transaction sent");
             alert(result);
         });
     });
