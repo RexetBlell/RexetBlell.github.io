@@ -34,7 +34,7 @@ var getTrustWalletFactory = function(web3) {
     }];
 
 
-    var ropsten_address = "0x25e29e97585711869d5e54fab65f860785711fae";
+    var ropsten_address = "0x3287b89f553f903da1a0ec67e5eb184b5f4bc53b";
     var abstract_contract = web3.eth.contract(contractABI);
     var specific_contract = abstract_contract.at(ropsten_address);
 
@@ -210,6 +210,20 @@ var getTrustWallet = function(web3, address) {
         "constant": true,
         "inputs": [],
         "name": "balance",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "transactionCount",
         "outputs": [
             {
                 "name": "",

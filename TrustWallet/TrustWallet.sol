@@ -67,6 +67,11 @@ contract TrustWallet {
         return address(this).balance;
     }
 
+    // Returns the balance of this contract.
+    function transactionCount() public constant returns (uint) {
+        return transactions.length;
+    }
+
     // Constructor. Creates the first user.
     function TrustWallet(address first_user) public {
         users[first_user] = User({
