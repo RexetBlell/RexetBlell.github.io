@@ -62,12 +62,11 @@ var constructUserObject = function(address, userContent) {
     var obj = {
         address: address,
         waiting_time: userContent[0],
-        is_active: userContent[1],
-        is_removed: userContent[2],
-        //time_added: moment.unix(userContent[3]).format(date_format),
-        time_added: userContent[3],
-        user_parent: userContent[4],
-        time_added_another_user: userContent[5] // TODO: deal with this nicer
+        added_by: userContent[1],
+        time_added: userContent[2],
+        removed_by: userContent[3],
+        time_removed: userContent[4],
+        time_added_another_user: userContent[5]
     };
     return obj;
 }
@@ -84,10 +83,10 @@ var constructUserHtml = function(obj, state) {
         waiting_time_str = 'Around ' + moment.duration(obj.waiting_time.toNumber(), "seconds").humanize() + ' (' + obj.waiting_time + ' seconds)';
     }
     var list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Waiting Time</h4> <p class="list-group-item-text">' + waiting_time_str + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Is Active</h4> <p class="list-group-item-text">' + obj.is_active + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Is Removed</h4> <p class="list-group-item-text">' + obj.is_removed + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Added By</h4> <p class="list-group-item-text">' + obj.added_by + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Added</h4> <p class="list-group-item-text">' + moment.unix(obj.time_added.toNumber()).format(date_format) + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">User Parent</h4> <p class="list-group-item-text">' + obj.user_parent + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Removed By</h4> <p class="list-group-item-text">' + obj.removed_by + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Removed</h4> <p class="list-group-item-text">' + moment.unix(obj.time_removed.toNumber()).format(date_format) + '</p></div>';
     var time_until = Math.round(Math.max(0, obj.time_added - (Date.now() / 1000) + obj.waiting_time));
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Until Can Add User</h4> <p class="list-group-item-text">' + time_until + '</p></div>';
 
