@@ -33,7 +33,8 @@ var getTrustWalletFactory = function(web3) {
         "type": "function"
     }];
 
-    var ropsten_address = "0x6d719c5df03aC5fcb73BB764EA60aD8f1886c644";
+
+    var ropsten_address = "0x25e29e97585711869d5e54fab65f860785711fae";
     var abstract_contract = web3.eth.contract(contractABI);
     var specific_contract = abstract_contract.at(ropsten_address);
 
@@ -43,6 +44,15 @@ var getTrustWalletFactory = function(web3) {
 var getTrustWallet = function(web3, address) {
 
     var contractABI = [{
+        "constant": false,
+        "inputs": [],
+        "name": "executeTransaction",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
         "constant": false,
         "inputs": [
             {
@@ -129,7 +139,7 @@ var getTrustWallet = function(web3, address) {
                 "type": "bytes"
             },
             {
-                "name": "initiator",
+                "name": "initiated_by",
                 "type": "address"
             },
             {
@@ -137,33 +147,24 @@ var getTrustWallet = function(web3, address) {
                 "type": "uint256"
             },
             {
-                "name": "time_finalized",
-                "type": "uint256"
-            },
-            {
                 "name": "finalized_by",
                 "type": "address"
+            },
+            {
+                "name": "time_finalized",
+                "type": "uint256"
             },
             {
                 "name": "is_executed",
                 "type": "bool"
             },
             {
-                "name": "is_canceled",
+                "name": "execution_successful",
                 "type": "bool"
             }
         ],
         "payable": false,
         "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": false,
-        "inputs": [],
-        "name": "finalizeTransaction",
-        "outputs": [],
-        "payable": false,
-        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -181,20 +182,20 @@ var getTrustWallet = function(web3, address) {
                 "type": "uint256"
             },
             {
-                "name": "is_active",
-                "type": "bool"
-            },
-            {
-                "name": "is_removed",
-                "type": "bool"
+                "name": "added_by",
+                "type": "address"
             },
             {
                 "name": "time_added",
                 "type": "uint256"
             },
             {
-                "name": "parent",
+                "name": "removed_by",
                 "type": "address"
+            },
+            {
+                "name": "time_removed",
+                "type": "uint256"
             },
             {
                 "name": "time_added_another_user",
@@ -209,20 +210,6 @@ var getTrustWallet = function(web3, address) {
         "constant": true,
         "inputs": [],
         "name": "balance",
-        "outputs": [
-            {
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [],
-        "name": "transactionCount",
         "outputs": [
             {
                 "name": "",
