@@ -163,7 +163,11 @@ var startApp = function(web3) {
                 if (cur_user == null) {
                     $("#panel_current_user").append("<h4>User Not Found</h4>");
                     for (var i = 0; i < users.length; i++) {
-                        $("#panel_users").append(constructUserHtml(users[i], "stronger"));
+                        if (users[i].time_removed > 0) {
+                            $("#panel_removed_users").append(constructUserHtml(users[i]));
+                        } else {
+                            $("#panel_users").append(constructUserHtml(users[i], "stronger"));
+                        }
                     }
                 } else {
                     for (var i = 0; i < users.length; i++) {
