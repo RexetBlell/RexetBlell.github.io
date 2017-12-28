@@ -10,46 +10,61 @@ function getParameterByName(name) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-var constructTransaction = function(tx_id, transactionContent) {
-    var destination = transactionContent[0];
-    var value = transactionContent[1];
-    var data = transactionContent[2];
-    var initiator = transactionContent[3];
-    var time_initiated = moment.unix(transactionContent[4]).format(date_format);
-    var time_finalized = moment.unix(transactionContent[5]).format(date_format);
-    var finalized_by = transactionContent[6];
-    var is_executed = transactionContent[7];
-    var is_canceled = transactionContent[8];
+var constructTransactionObject = function(tx_id, transactionContent) {
+    var result = {
+        destination: transactionContent[0],
+        value: transactionContent[1].toNumber(),
+        data: transactionContent[2],
+        initiated_by: transactionContent[3],
+        time_initiated: transactionContent[4].toNumber(),
+        finalized_by: transactionContent[5],
+        time_finalized: transactionContent[6].toNumber(),
+        is_executed: transactionContent[7],
+        execution_successful: transactionContent[8],
+        tx_id: tx_id
+    }
+    return result;
+}
 
+var constructTransaction = function(tx, initiator) {
     var title;
     var tx_status;
     var panel_status;
 
     var buttons = '';
 
-    if (is_executed) {
-        title = 'Transaction #' + tx_id + ' (Executed)';
-        tx_status = "Executed";
-        panel_status = "success";
-    } else if (is_canceled) {
-        title = 'Transaction #' + tx_id + ' (Canceled)';
-        tx_status = "Canceled";
-        panel_status = "danger";
-    } else {
-        title = 'Transaction #' + tx_id + ' (Pending)';
+    if (tx.time_finalized == 0) {
+        title = 'Transaction #' + tx.tx_id + ' (Pending)';
         tx_status = "Pending";
         panel_status = "primary";
+    } else if (tx.is_executed) {
+        title = 'Transaction #' + tx.tx_id + ' (Executed)';
+        tx_status = "Executed";
+        panel_status = "success";
+    } else {
+        title = 'Transaction #' + tx.tx_id + ' (Canceled)';
+        tx_status = "Canceled";
+        panel_status = "danger";
     }
 
-    var list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Destination</h4> <p class="list-group-item-text">' + destination + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Value</h4> <p class="list-group-item-text">' + value + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Data</h4> <p class="list-group-item-text">' + data + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Initiator</h4> <p class="list-group-item-text">' + initiator + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Date Initiated</h4> <p class="list-group-item-text">' + time_initiated + '</p></div>';
-    if (is_executed || is_canceled) {
-        list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Date ' + tx_status + '</h4> <p class="list-group-item-text">' + time_finalized + '</p></div>';
-        list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">' + tx_status + ' By</h4> <p class="list-group-item-text">' + finalized_by + '</p></div>';
+    var list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Destination</h4> <p class="list-group-item-text">' + tx.destination + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Value</h4> <p class="list-group-item-text">' + tx.value + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Data</h4> <p class="list-group-item-text">' + tx.data + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">initiated_by</h4> <p class="list-group-item-text">' + tx.initiated_by + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Date Initiated</h4> <p class="list-group-item-text">' + moment.unix(tx.time_initiated).format(date_format) + '</p></div>';
+    if (tx.time_finalized != 0) {
+        list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Date ' + tx_status + '</h4> <p class="list-group-item-text">' + moment.unix(tx.time_finalized).format(date_format) + '</p></div>';
+        list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">' + tx_status + ' By</h4> <p class="list-group-item-text">' + tx.finalized_by + '</p></div>';
+        if (tx.is_executed) {
+            var panel_color = "list-group-item-danger";
+            if (tx.execution_successful) panel_color = "list-group-item-success";
+            list_items += '<div class="list-group-item ' + panel_color + '"> <h4 class="list-group-item-heading">Execution Successful</h4> <p class="list-group-item-text">' + tx.execution_successful + '</p></div>';
+        }
     } else {
+        var time_until = Math.round(Math.max(0, tx.time_initiated - (Date.now() / 1000) + initiator.waiting_time));
+        var panel_color = "list-group-item-success";
+        if (time_until > 0) panel_color = "list-group-item-danger";
+        list_items += '<div class="list-group-item ' + panel_color + '"> <h4 class="list-group-item-heading">Time Until Can Be Finalized</h4> <p class="list-group-item-text">' + time_until + '</p></div>';
         buttons += '<button type="button" class="btn btn-default" id="btn_finalize_transaction">Finalize Transaction</button>';
         buttons += '<button type="button" class="btn btn-default" id="btn_cancel_transaction">Cancel Transaction</button>';
     }
@@ -61,12 +76,12 @@ var constructTransaction = function(tx_id, transactionContent) {
 var constructUserObject = function(address, userContent) {
     var obj = {
         address: address,
-        waiting_time: userContent[0],
+        waiting_time: userContent[0].toNumber(),
         added_by: userContent[1],
-        time_added: userContent[2],
+        time_added: userContent[2].toNumber(),
         removed_by: userContent[3],
-        time_removed: userContent[4],
-        time_added_another_user: userContent[5]
+        time_removed: userContent[4].toNumber(),
+        time_added_another_user: userContent[5].toNumber()
     };
     return obj;
 }
@@ -80,19 +95,21 @@ var constructUserHtml = function(obj, state) {
     if (obj.waiting_time < 60) {
         waiting_time_str = obj.waiting_time + " seconds";
     } else {
-        waiting_time_str = 'Around ' + moment.duration(obj.waiting_time.toNumber(), "seconds").humanize() + ' (' + obj.waiting_time + ' seconds)';
+        waiting_time_str = 'Around ' + moment.duration(obj.waiting_time, "seconds").humanize() + ' (' + obj.waiting_time + ' seconds)';
     }
     var list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Waiting Time</h4> <p class="list-group-item-text">' + waiting_time_str + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Added By</h4> <p class="list-group-item-text">' + obj.added_by + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Added</h4> <p class="list-group-item-text">' + moment.unix(obj.time_added.toNumber()).format(date_format) + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Added</h4> <p class="list-group-item-text">' + moment.unix(obj.time_added).format(date_format) + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Removed By</h4> <p class="list-group-item-text">' + obj.removed_by + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Removed</h4> <p class="list-group-item-text">' + moment.unix(obj.time_removed.toNumber()).format(date_format) + '</p></div>';
-    var time_until = Math.round(Math.max(0, obj.time_added - (Date.now() / 1000) + obj.waiting_time));
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Until Can Add User</h4> <p class="list-group-item-text">' + time_until + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Removed</h4> <p class="list-group-item-text">' + moment.unix(obj.time_removed).format(date_format) + '</p></div>';
+    if (obj.time_removed == 0) {
+        var time_until = Math.round(Math.max(0, obj.time_added - (Date.now() / 1000) + obj.waiting_time));
+        list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Until Can Add User</h4> <p class="list-group-item-text">' + time_until + '</p></div>';
+    }
 
     var panel_type = "primary";
-    if (obj.is_removed) {
-        panel_type = "danger";
+        if (obj.time_removed > 0) {
+            panel_type = "danger";
     } else if (state == "weaker") {
         panel_type = "info";
     }
@@ -112,8 +129,12 @@ var startApp = function(web3) {
     var refreshTransactions = function(index, newest) {
         if (index >= 0) {
             wallet.transactions(index, function(error, result) {
-                $("#panel_transactions").append(constructTransaction(index, result));
-                refreshTransactions(index - 1, false);
+                tx = constructTransactionObject(index, result);
+                wallet.users(tx.initiated_by, function(error, user_info) {
+                    initiator = constructUserObject(tx.initiated_by, user_info);
+                    $("#panel_transactions").append(constructTransaction(tx, initiator));
+                    refreshTransactions(index - 1, false);
+                });
             });
         }
     }
@@ -141,7 +162,7 @@ var startApp = function(web3) {
                     for (var i = 0; i < users.length; i++) {
                         if (users[i].address == cur_user.address) {
                             $("#panel_current_user").append(constructUserHtml(users[i], "cur_user"));
-                        } else if (users[i].is_removed) {
+                        } else if (users[i].time_removed > 0) {
                             $("#panel_removed_users").append(constructUserHtml(users[i]));
                         } else if (users[i].waiting_time < cur_user.waiting_time) {
                             $("#panel_users").append(constructUserHtml(users[i], "stronger"));
@@ -163,6 +184,8 @@ var startApp = function(web3) {
     var refresh = function(wallet) {
         $("#panel_transactions").empty();
         $("#panel_users").empty();
+        $("#panel_removed_users").empty();
+        $("#panel_current_user").empty();
         $("#out_wallet_address").text("Wallet Address: " + wallet_address);
         wallet.balance(function(error, result) {
             $("#out_balance").text("Balance: " + result);
@@ -195,7 +218,7 @@ var startApp = function(web3) {
 
     $('body').on('click', 'button.btn', function() {
         if ($(this).attr('id') == 'btn_finalize_transaction') {
-            wallet.finalizeTransaction({from: web3.eth.accounts[0]}, function(error, result) {
+            wallet.executeTransaction({from: web3.eth.accounts[0]}, function(error, result) {
                 alert("finalize transaction sent");
                 alert(result);
             });
