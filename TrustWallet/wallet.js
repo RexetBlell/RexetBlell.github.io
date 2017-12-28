@@ -62,9 +62,11 @@ var constructTransaction = function(tx, initiator) {
         }
     } else {
         var time_until = Math.round(Math.max(0, tx.time_initiated - (Date.now() / 1000) + initiator.waiting_time));
-        var panel_color = "list-group-item-success";
-        if (time_until > 0) panel_color = "list-group-item-danger";
-        list_items += '<div class="list-group-item ' + panel_color + '"> <h4 class="list-group-item-heading">Time Until Can Be Finalized</h4> <p class="list-group-item-text">' + time_until + '</p></div>';
+        if (time_until == 0) {
+            list_items += '<div class="list-group-item list-group-item-success"> <h4 class="list-group-item-heading">Can Be Executed Now</h4></div>';
+        } else {
+            list_items += '<div class="list-group-item list-group-item-danger"> <h4 class="list-group-item-heading">How Long Until Can Be Executed</h4> <p class="list-group-item-text"> Around ' + moment.duration(time_until, "seconds").humanize() + ' (' + time_until + ' seconds)</p></div>';
+        }
         buttons += '<button type="button" class="btn btn-default" id="btn_finalize_transaction">Finalize Transaction</button>';
         buttons += '<button type="button" class="btn btn-default" id="btn_cancel_transaction">Cancel Transaction</button>';
     }
@@ -99,12 +101,17 @@ var constructUserHtml = function(obj, state) {
     }
     var list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Waiting Time</h4> <p class="list-group-item-text">' + waiting_time_str + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Added By</h4> <p class="list-group-item-text">' + obj.added_by + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Added</h4> <p class="list-group-item-text">' + moment.unix(obj.time_added).format(date_format) + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Removed By</h4> <p class="list-group-item-text">' + obj.removed_by + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Removed</h4> <p class="list-group-item-text">' + moment.unix(obj.time_removed).format(date_format) + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Date Added</h4> <p class="list-group-item-text">' + moment.unix(obj.time_added).format(date_format) + '</p></div>';
     if (obj.time_removed == 0) {
         var time_until = Math.round(Math.max(0, obj.time_added - (Date.now() / 1000) + obj.waiting_time));
-        list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Until Can Add User</h4> <p class="list-group-item-text">' + time_until + '</p></div>';
+        if (time_until == 0) {
+            list_items += '<div class="list-group-item list-group-item-success"> <h4 class="list-group-item-heading">Can Add Another User Now</h4></div>';
+        } else {
+            list_items += '<div class="list-group-item list-group-item-danger"> <h4 class="list-group-item-heading">How Long Until Can Add Another User</h4> <p class="list-group-item-text"> Around ' + moment.duration(time_until, "seconds").humanize() + ' (' + time_until + ' seconds)</p></div>';
+        }
+    } else {
+        list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Removed By</h4> <p class="list-group-item-text">' + obj.removed_by + '</p></div>';
+        list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Date Removed</h4> <p class="list-group-item-text">' + moment.unix(obj.time_removed).format(date_format) + '</p></div>';
     }
 
     var panel_type = "primary";
