@@ -1,0 +1,25 @@
+Trust wallet is deisnged to protect against hackers and against forgetting your keys. If you forget one of the keys, it is still possible to recover the funds, you just may need to wait longer. It has some advantages compared to the multisig.
+
+Suggested use:
+The wallet should have 5 keys:
+Paper wallet - 1 week
+Backup Hardware Wallet (like Ledger Nano S) - 2 weeks
+Daily Hardware Wallet - 1 month
+Close Friend - 6 months
+Other Friend - 1 year
+
+With this kind of set up it makes makes sense to check your wallet at least once a month to make sure there are no unexpected transactions there (and that no new unexpected users were added). If there is an unauthorized transaction, the user should be removed, and the transaction canceled.
+
+It makes sense to have a 1 week waiting period for the most privileged user to avoid the possibility of extortion. Even if you are kidnapped and someone is forcing you to give them your money, you have to wait at least one week to be able to do this.
+
+It is possible to use this contract in combination with other wallets. For example, it may make sense to make the most privileged user be a multisig.
+
+If a user feels that their key may bo compromised, she can replace herself. This can be done by adding a new user with the same privilege level, then removing herself.
+
+There can be only one pending transaction at a time. The transaction must be executed or canceled before a new one can be initiated. This is done to make the contract simpler (and to prevent potential spam attacks).
+
+- Users can cancel transaction initiated by users that have the same privilege level or lower.
+- Users can remove other users that have the same privilege level or lower. This is why we suggest that no two users should have the same privilege level.
+- Transactions can be executed any user of the wallet.
+- Ether can be deposited into the wallet by anyone.
+- A user cannot be readded once removed. The privilege level for a user can be set only when the user is added. It is not possible to change the privilege level for a user later on. This is to make the contract simpler.
