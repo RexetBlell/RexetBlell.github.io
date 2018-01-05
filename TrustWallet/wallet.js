@@ -48,9 +48,9 @@ var constructTransaction = function(tx, initiator) {
     }
 
     var list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Destination</h4> <p class="list-group-item-text">' + tx.destination + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Value</h4> <p class="list-group-item-text">' + tx.value + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Value</h4> <p class="list-group-item-text">' + web3.fromWei(tx.value, "ether") + ' ETH</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Data</h4> <p class="list-group-item-text">' + tx.data + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">initiated_by</h4> <p class="list-group-item-text">' + tx.initiated_by + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Initiated By</h4> <p class="list-group-item-text">' + tx.initiated_by + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Date Initiated</h4> <p class="list-group-item-text">' + moment.unix(tx.time_initiated).format(date_format) + '</p></div>';
     if (tx.time_finalized != 0) {
         list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Date ' + tx_status + '</h4> <p class="list-group-item-text">' + moment.unix(tx.time_finalized).format(date_format) + '</p></div>';
@@ -63,12 +63,14 @@ var constructTransaction = function(tx, initiator) {
     } else {
         var time_until = Math.round(Math.max(0, tx.time_initiated - (Date.now() / 1000) + initiator.waiting_time));
         if (time_until == 0) {
-            list_items += '<div class="list-group-item list-group-item-success"> <h4 class="list-group-item-heading">Can Be Executed Now</h4></div>';
+            list_items += '<div class="list-group-item list-group-item-success"> <p class="list-group-item-text">Can be executed now</p></div>';
         } else {
-            list_items += '<div class="list-group-item list-group-item-danger"> <h4 class="list-group-item-heading">How Long Until Can Be Executed</h4> <p class="list-group-item-text"> Around ' + moment.duration(time_until, "seconds").humanize() + ' (' + time_until + ' seconds)</p></div>';
+            list_items += '<div class="list-group-item list-group-item-danger"> <p class="list-group-item-text"> Can be executed in around ' + moment.duration(time_until, "seconds").humanize() + ' (' + time_until + ' seconds)</p></div>';
         }
+        buttons += '<div class="btn-group">';
         buttons += '<button type="button" class="btn btn-default" id="btn_finalize_transaction">Finalize Transaction</button>';
         buttons += '<button type="button" class="btn btn-default" id="btn_cancel_transaction">Cancel Transaction</button>';
+        buttons += '</div>';
     }
 
     return '<div class="panel panel-' + panel_status + '"> <div class="panel-heading">' + title + '</div> <div class="panel-body"> <div class="list-group">' + list_items + '</div>' + buttons + '</div> </div>';
@@ -89,9 +91,13 @@ var constructUserObject = function(address, userContent) {
 }
 
 var constructUserHtml = function(obj, state) {
-    var buttons = '<button type="button" class="btn btn-default remove-user" address="' + obj.address + '">Remove</button>';
-    if (state == "cur_user") {
-        buttons = '<button type="button" class="btn btn-default remove-user" address="' + obj.address + '">Remove Self</button>';
+    var buttons = '';
+    if (obj.time_removed == 0) {
+        if (state == "cur_user") {
+            buttons = '<button type="button" class="btn btn-default remove-user" address="' + obj.address + '">Remove Self</button>';
+        } else {
+            buttons = '<button type="button" class="btn btn-default remove-user" address="' + obj.address + '">Remove</button>';
+        }
     }
     var waiting_time_str;
     if (obj.waiting_time < 60) {
@@ -105,9 +111,9 @@ var constructUserHtml = function(obj, state) {
     if (obj.time_removed == 0) {
         var time_until = Math.round(Math.max(0, obj.time_added - (Date.now() / 1000) + obj.waiting_time));
         if (time_until == 0) {
-            list_items += '<div class="list-group-item list-group-item-success"> <h4 class="list-group-item-heading">Can Add Another User Now</h4></div>';
+            list_items += '<div class="list-group-item list-group-item-success"> <p class="list-group-item-text">Can add another user now</p></div>';
         } else {
-            list_items += '<div class="list-group-item list-group-item-danger"> <h4 class="list-group-item-heading">How Long Until Can Add Another User</h4> <p class="list-group-item-text"> Around ' + moment.duration(time_until, "seconds").humanize() + ' (' + time_until + ' seconds)</p></div>';
+            list_items += '<div class="list-group-item list-group-item-danger"> <p class="list-group-item-text">Can add another user in around ' + moment.duration(time_until, "seconds").humanize() + ' (' + time_until + ' seconds)</p></div>';
         }
     } else {
         list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Removed By</h4> <p class="list-group-item-text">' + obj.removed_by + '</p></div>';
@@ -127,12 +133,7 @@ var constructUserHtml = function(obj, state) {
     return '<div class="panel panel-' + panel_type + '"> <div class="panel-heading">User: ' + obj.address + '</div> <div class="panel-body"> <div class="list-group">' + list_items + '</div>' + buttons + '</div> </div>';
 }
 
-var startApp = function(web3) {
-
-    var wallet_address = getParameterByName("wallet_address");
-    var wallet = getTrustWallet(web3, wallet_address);
-
-
+var continueLoading = function(web3, wallet_address, wallet) {
     var refreshTransactions = function(index, newest) {
         if (index >= 0) {
             wallet.transactions(index, function(error, result) {
@@ -159,9 +160,9 @@ var startApp = function(web3) {
                     // find the current user
                     if (users[i].address == web3.eth.accounts[0]) cur_user = users[i];
                 }
-                $("#panel_current_user_heading").text("Current User Address: " + web3.eth.accounts[0]);
+                $("#panel_current_user_heading").html("<h4>Current User Address: " + web3.eth.accounts[0] + "</h4");
                 if (cur_user == null) {
-                    $("#panel_current_user").append("<h4>User Not Found</h4>");
+                    $("#panel_current_user").append("<h4>User Not Found</h4><p>Looks like you are not an active user of this wallet and can only view. You cannot perform any actions.</p>");
                     for (var i = 0; i < users.length; i++) {
                         if (users[i].time_removed > 0) {
                             $("#panel_removed_users").append(constructUserHtml(users[i]));
@@ -199,7 +200,7 @@ var startApp = function(web3) {
         $("#panel_current_user").empty();
         $("#out_wallet_address").text("Wallet Address: " + wallet_address);
         wallet.balance(function(error, result) {
-            $("#out_balance").text("Balance: " + result);
+            $("#out_balance").text("Balance: " + web3.fromWei(result, 'ether') + " ETH");
         });
 
         wallet.transactionCount(function(error, result) {
@@ -211,42 +212,87 @@ var startApp = function(web3) {
 
    	$("#btn_initiate_transaction").click(function() {
         var dest = $("#inp_destination").val();
-        var val = $("#inp_value").val();
+        var val = web3.toWei($("#inp_value").val(), 'ether');
         var data = $("#inp_data").val();
-        wallet.initiateTransaction(dest, val, data, {from: web3.eth.accounts[0]}, function(error, result) {
-            alert(result);
+        wallet.initiateTransaction.estimateGas(dest, val, data, {from: web3.eth.accounts[0]}, function(error, result) {
+            if (error || result > 3000000) {
+                alert("Error.\n-You must be an active user of this wallet\n-There must be no pending transactions");
+            } else {
+                wallet.initiateTransaction(dest, val, data, {from: web3.eth.accounts[0]}, function(error, result) {
+                    if (error) {
+                        alert("Error: " + error);
+                    } else {
+                        console.log(result);
+                    }
+                });
+            }
         });
     });
 
    	$("#btn_add_user").click(function() {
         var user_address = $("#inp_new_user_address").val();
         var waiting_time = $("#inp_new_user_waiting_time").val(); // TODO: make specifying this easier
-        wallet.addUser(user_address, waiting_time, {from: web3.eth.accounts[0]}, function(error, result) {
-            alert("add user transaction sent");
-            alert(result);
+        wallet.addUser.estimateGas(user_address, waiting_time, {from: web3.eth.accounts[0]}, function(error, result) {
+            if (error || result > 3000000) {
+                alert("Error.\n-You must be an active user of this wallet\n-The user you are trying to add must not already exist\n-The user you are trying to add must not have been removed\n-The waiting time of the user you are trying to add must be higher than or equal to your waiting time");
+            } else {
+                wallet.addUser(user_address, waiting_time, {from: web3.eth.accounts[0]}, function(error, result) {
+                    if (error) {
+                        alert("Error: " + error);
+                    } else {
+                        console.log(result);
+                    }
+                });
+            }
         });
     });
 
     $('body').on('click', 'button.btn', function() {
         if ($(this).attr('id') == 'btn_finalize_transaction') {
-            wallet.executeTransaction({from: web3.eth.accounts[0]}, function(error, result) {
-                alert("finalize transaction sent");
-                alert(result);
+            wallet.executeTransaction.estimateGas({from: web3.eth.accounts[0]}, function(error, result) {
+                if (error || result > 3000000) {
+                    alert("Error.\n-You must be an active user of this wallet\n-The waiting time of the user who initiated the transaction must have passed before it can be finalized");
+                } else {
+                    wallet.executeTransaction({from: web3.eth.accounts[0]}, function(error, result) {
+                        if (error) {
+                            alert("Error: " + error);
+                        } else {
+                            console.log(result);
+                        }
+                    });
+                }
             });
         } else if ($(this).attr('id') == 'btn_cancel_transaction') {
-            wallet.cancelTransaction({from: web3.eth.accounts[0]}, function(error, result) {
-                alert("cancel transaction sent");
-                alert(result);
+            wallet.cancelTransaction.estimateGas({from: web3.eth.accounts[0]}, function(error, result) {
+                wallet.cancelTransaction({from: web3.eth.accounts[0]}, function(error, result) {
+                    if (error || result > 3000000) {
+                        alert("Error.\n-You must be an active user of this wallet\n-Your waiting time must be lower than or equal to the waiting time of the transaction initiator");
+                    } else {
+                        if (error) {
+                            alert("Error: " + error);
+                        } else {
+                            console.log(result);
+                        }
+                    }
+                });
             });
         }
     });
 
     $('body').on('click', 'button.remove-user', function() {
         var user_address = $(this).attr('address');
-        alert(user_address);
-        wallet.removeUser(user_address, {from: web3.eth.accounts[0]}, function(error, result) {
-            alert(error);
-            alert(result);
+        wallet.removeUser.estimateGas(user_address, {from: web3.eth.accounts[0]}, function(error, result) {
+            if (error || result > 3000000) {
+                alert("Error.\n-You must be an active user of this wallet\n-The user you are trying to remove must have a higher waiting time time than you");
+            } else {
+                wallet.removeUser(user_address, {from: web3.eth.accounts[0]}, function(error, result) {
+                    if (error) {
+                        alert("Error: " + error);
+                    } else {
+                        console.log(result);
+                    }
+                });
+            }
         });
     });
 
@@ -254,7 +300,30 @@ var startApp = function(web3) {
         refresh(wallet);
     });
 
+    $("#btn_deposit").click(function() {
+        var value = $("#inp_deposit_amount").val();
+        web3.eth.sendTransaction({to: wallet.address, value: web3.toWei(value, 'ether')}, function(error, result) {
+            if (error) {
+                alert("Error: " + error);
+            } else {
+                console.log(result);
+            }
+        });
+    });
+
     refresh(wallet);
+}
+
+var startApp = function(web3) {
+
+    var wallet_address = getParameterByName("wallet_address");
+    var wallet = getTrustWallet(web3, wallet_address, function(error, result) {
+        if (error) {
+            alert(error);
+        } else {
+            continueLoading(web3, wallet_address, result);
+        }
+    });
 }
 
 $(function() {
@@ -271,12 +340,6 @@ $(function() {
             callback(myWeb3);
         }
     }
-
-    /*
-    function startApp(web3) {
-        alert("nice, app started");
-    }
-    */
 
     getWeb3(startApp);
 

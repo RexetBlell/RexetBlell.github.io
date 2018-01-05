@@ -21,7 +21,13 @@
             <h4 id="out_wallet_address"></h4>
             <h4 id="out_balance"></h4>
             <h4 id="out_transaction_count"></h4>
-            <button type="button" class="btn btn-default" id="btn_refresh">Refresh</button>
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="Deposit Amount" id="inp_deposit_amount" aria-describedby="basic-addon2">
+              <span class="input-group-addon" id="basic-addon2">ETH</span>
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-success" id="btn_deposit">Deposit</button>
+              </span>
+            </div>
           </div>
         </div>
         <div class="panel panel-default">
@@ -32,7 +38,7 @@
       <div class="col-md-12">
         <div class="col-md-6">
           <div class="panel panel-default">
-            <div class="panel-heading">Create New Transaction</div>
+            <div class="panel-heading"><h4>Create New Transaction</h4></div>
             <div class="panel-body">
               <form>
                 <div class="form-group">
@@ -41,7 +47,7 @@
                 </div>
                 <div class="form-group">
                   <label for="inp_value">Value</label>
-                  <input type="text" class="form-control" id="inp_value" placeholder="Value (Wei)">
+                  <input type="text" class="form-control" id="inp_value" placeholder="Value (ETH)">
                 </div>
                 <div class="form-group">
                   <label for="inp_data">Data</label>
@@ -54,7 +60,7 @@
         </div>
         <div class="col-md-6">
           <div class="panel panel-default">
-            <div class="panel-heading">Add New User</div>
+            <div class="panel-heading"><h4>Add New User</h4></div>
             <div class="panel-body">
               <form>
                 <div class="form-group">
@@ -63,7 +69,7 @@
                 </div>
                 <div class="form-group">
                   <label for="inp_destination">Waiting Time</label>
-                  <input type="text" class="form-control" id="inp_new_user_waiting_time" placeholder="Destination">
+                  <input type="text" class="form-control" id="inp_new_user_waiting_time" placeholder="Waiting Time (Seconds)">
                 </div>
                 <button type="button" class="btn btn-default" id="btn_add_user">Add User</button>
               </form>
@@ -75,18 +81,18 @@
       <div class="col-md-12">
         <div class="col-md-6">
           <div class="panel panel-default">
-            <div class="panel-heading">Transactions</div>
+            <div class="panel-heading"><h4>Transactions</h4></div>
             <div class="panel-body" id="panel_transactions"> </div>
           </div>
         </div>
 
         <div class="col-md-6">
           <div class="panel panel-default">
-            <div class="panel-heading">Active Users</div>
+            <div class="panel-heading"><h4>Active Users</h4></div>
             <div class="panel-body" id="panel_users"> </div>
           </div>
           <div class="panel panel-default">
-            <div class="panel-heading">Removed Users</div>
+            <div class="panel-heading"><h4>Removed Users</h4></div>
             <div class="panel-body" id="panel_removed_users"> </div>
           </div>
         </div>

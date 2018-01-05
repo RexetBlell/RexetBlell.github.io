@@ -41,7 +41,7 @@ var getTrustWalletFactory = function(web3) {
     return specific_contract;
 }
 
-var getTrustWallet = function(web3, address) {
+var getTrustWallet = function(web3, address, fn) {
 
     var contractABI = [{
         "constant": false,
@@ -284,7 +284,12 @@ var getTrustWallet = function(web3, address) {
     }];
 
     var abstract_contract = web3.eth.contract(contractABI);
-    var specific_contract = abstract_contract.at(address);
-
-    return specific_contract;
+    web3.eth.getCode(address, function(error, result) {
+        if (result.length == 6968) {
+            var specific_contract = abstract_contract.at(address);
+            fn(null, specific_contract);
+        } else {
+            fn("No TrustWallet contract found at this address: " + address, null);
+        }
+    });
 }
