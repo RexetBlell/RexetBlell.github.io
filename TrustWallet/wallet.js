@@ -137,6 +137,10 @@ var continueLoading = function(web3, wallet_address, wallet) {
     var old_cur_user = "";
     var old_transactions = null;
 
+    $("#btn_etherscan").click(function() {
+        window.location.href = "https://ropsten.etherscan.io/address/" + wallet_address;
+    });
+
     var isSame = function(old_array, new_array) {
         if (old_array == null || new_array == null) return false;
         if (old_array.length != new_array.length) return false;
@@ -345,6 +349,10 @@ var continueLoading = function(web3, wallet_address, wallet) {
 }
 
 var startApp = function(web3) {
+
+    $("#btn_find_wallet").click(function() {
+        window.location.href = "wallet.html?wallet_address=" + $("#inp_wallet_address").val();
+    });
 
     var wallet_address = getParameterByName("wallet_address");
     var wallet = getTrustWallet(web3, wallet_address, function(error, result) {

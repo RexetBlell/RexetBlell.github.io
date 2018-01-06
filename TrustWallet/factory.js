@@ -61,6 +61,10 @@ var startApp = function(web3) {
         window.location.href = "wallet.html?wallet_address=" + $("#inp_wallet_address").val();
     });
 
+    $("#btn_etherscan").click(function() {
+        window.location.href = "https://ropsten.etherscan.io/address/0x3287b89f553f903da1a0ec67e5eb184b5f4bc53b";
+    });
+
     $("#btn_create_wallet").click(function() {
         trustWalletFactory.createWallet(function(error, result) {
             if (error) {

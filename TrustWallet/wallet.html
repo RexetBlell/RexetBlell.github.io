@@ -11,8 +11,35 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="main.css" rel="stylesheet">
 
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+
   </head>
   <body>
+
+	<nav class="navbar navbar-default navbar-static-top">
+	  <div class="container">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+		  <a class="navbar-brand" href="/">Trust Wallet</a>
+		</div>
+
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <button type="button" class="btn btn-default navbar-btn navbar-right" id="btn_etherscan">View Contract on EtherScan</button>
+		  <form class="navbar-form navbar-right">
+			<div class="form-group">
+			  <input type="text" class="form-control" placeholder="Wallet Address" id="inp_wallet_address">
+			</div>
+			<button type="button" class="btn btn-default" id="btn_find_wallet">Find Wallet</button>
+		  </form>
+		</div><!-- /.navbar-collapse -->
+	  </div><!-- /.container-fluid -->
+	</nav>
 
     <div class="container">
       <div class="col-md-12">

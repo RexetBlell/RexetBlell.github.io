@@ -284,12 +284,18 @@ var getTrustWallet = function(web3, address, fn) {
     }];
 
     var abstract_contract = web3.eth.contract(contractABI);
-    web3.eth.getCode(address, function(error, result) {
-        if (result.length == 6968) {
-            var specific_contract = abstract_contract.at(address);
-            fn(null, specific_contract);
-        } else {
-            fn("No TrustWallet contract found at this address: " + address, null);
-        }
-    });
+    if (address.length != 42) {
+        fn("Address Invalid: " + address, null);
+    } else {
+        web3.eth.getCode(address, function(error, result) {
+            if (!error && result.length == 6968) {
+                var specific_contract = abstract_contract.at(address);
+                fn(null, specific_contract);
+            } else {
+                fn("No TrustWallet contract found at this address: " + address, null);
+            }
+        });
+    }
 }
+
+0xb3efdd96780951b7b20094edebacd2a2bae95623
