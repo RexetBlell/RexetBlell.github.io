@@ -134,24 +134,46 @@ var constructUserHtml = function(obj, state) {
 }
 
 var continueLoading = function(web3, wallet_address, wallet) {
-    var refreshTransactions = function(index, newest) {
-        if (index >= 0) {
-            wallet.transactions(index, function(error, result) {
+
+    var old_users = [];
+    var old_transactions = [];
+
+    var isSame = function(old_array, new_array) {
+        if (old_array.length != new_array.length) return false;
+        for (var i = 0; i < new_array.length; i++) {
+            if (JSON.stringify(old_array[i]) !== JSON.stringify(new_array[i])) return false;
+        }
+        return true;
+    }
+
+    var refreshTransactions = function(index, transactions, transactionInitiators, fn) {
+        wallet.transactions(index, function(error, result) {
+            if (result == null) {
+                fn(null, transactions, transactionInitiators);
+            } else {
                 tx = constructTransactionObject(index, result);
+                transactions.push(tx);
                 wallet.users(tx.initiated_by, function(error, user_info) {
-                    initiator = constructUserObject(tx.initiated_by, user_info);
-                    $("#panel_transactions").append(constructTransaction(tx, initiator));
-                    refreshTransactions(index - 1, false);
+                    transactionInitiators.push(constructUserObject(tx.initiated_by, user_info));
+                    refreshTransactions(index + 1, transactions, transactionInitiators, fn);
                 });
-            });
+            }
+        });
+    }
+
+    var displayTransactions = function(error, transactions, transactionInitiators) {
+        if (isSame(old_transactions, transactions)) return;
+        $("#panel_transactions").empty();
+        $("#out_transaction_count").text("Transaction Count: " + transactions.length);
+        old_transactions = transactions;
+        for (var i = transactions.length - 1; i >= 0; i--) {
+            $("#panel_transactions").append(constructTransaction(transactions[i], transactionInitiators[i]));
         }
     }
 
     var compare_users = function(a, b) {
         return a.waiting_time - b.waiting_time;
     }
-
-    var old_users = [];
 
     var refreshUsers = function(index, users, fn) {
         wallet.userAddresses(index, function(error, user_address) {
@@ -165,14 +187,6 @@ var continueLoading = function(web3, wallet_address, wallet) {
             }
 
         });
-    }
-
-    var isSame = function(old_array, new_array) {
-        if (old_array.length != new_array.length) return false;
-        for (var i = 0; i < new_array.length; i++) {
-            if (JSON.stringify(old_array[i]) !== JSON.stringify(new_array[i])) return false;
-        }
-        return true;
     }
 
     var displayUsers = function(error, users) {
@@ -212,19 +226,17 @@ var continueLoading = function(web3, wallet_address, wallet) {
         }
     }
 
-    var refresh = function(wallet) {
-        $("#panel_transactions").empty();
+    var refresh = function() {
         $("#out_wallet_address").text("Wallet Address: " + wallet_address);
         wallet.balance(function(error, result) {
             $("#out_balance").text("Balance: " + web3.fromWei(result, 'ether') + " ETH");
         });
 
-        wallet.transactionCount(function(error, result) {
-            $("#out_transaction_count").text("Transaction Count: " + result);
-            refreshTransactions(result - 1, true);
-        });
+        refreshTransactions(0, [], [], displayTransactions);
         refreshUsers(0, [], displayUsers);
     }
+
+    setInterval(refresh, 1000);
 
    	$("#btn_initiate_transaction").click(function() {
         var dest = $("#inp_destination").val();
@@ -312,10 +324,6 @@ var continueLoading = function(web3, wallet_address, wallet) {
         });
     });
 
-    $("#btn_refresh").click(function() {
-        refresh(wallet);
-    });
-
     $("#btn_deposit").click(function() {
         var value = $("#inp_deposit_amount").val();
         web3.eth.sendTransaction({to: wallet.address, value: web3.toWei(value, 'ether')}, function(error, result) {
@@ -327,7 +335,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
         });
     });
 
-    refresh(wallet);
+    refresh();
 }
 
 var startApp = function(web3) {
