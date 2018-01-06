@@ -151,53 +151,69 @@ var continueLoading = function(web3, wallet_address, wallet) {
         return a.waiting_time - b.waiting_time;
     }
 
-    var refreshUsers = function(index, users) {
+    var old_users = [];
+
+    var refreshUsers = function(index, users, fn) {
         wallet.userAddresses(index, function(error, user_address) {
             if (user_address == "0x") {
-                users.sort(compare_users);
-                var cur_user = null;
-                for (var i = 0; i < users.length; i++) {
-                    // find the current user
-                    if (users[i].address == web3.eth.accounts[0]) cur_user = users[i];
-                }
-                $("#panel_current_user_heading").html("<h4>Current User Address: " + web3.eth.accounts[0] + "</h4");
-                if (cur_user == null) {
-                    $("#panel_current_user").append("<h4>User Not Found</h4><p>Looks like you are not an active user of this wallet and can only view. You cannot perform any actions.</p>");
-                    for (var i = 0; i < users.length; i++) {
-                        if (users[i].time_removed > 0) {
-                            $("#panel_removed_users").append(constructUserHtml(users[i]));
-                        } else {
-                            $("#panel_users").append(constructUserHtml(users[i], "stronger"));
-                        }
-                    }
-                } else {
-                    for (var i = 0; i < users.length; i++) {
-                        if (users[i].address == cur_user.address) {
-                            $("#panel_current_user").append(constructUserHtml(users[i], "cur_user"));
-                        } else if (users[i].time_removed > 0) {
-                            $("#panel_removed_users").append(constructUserHtml(users[i]));
-                        } else if (users[i].waiting_time < cur_user.waiting_time) {
-                            $("#panel_users").append(constructUserHtml(users[i], "stronger"));
-                        } else {
-                            $("#panel_users").append(constructUserHtml(users[i], "weaker"));
-                        }
-                    }
-                }
+                fn(null, users);
             } else {
                 wallet.users(user_address, function(error, result) {
                     users.push(constructUserObject(user_address, result));
-                    refreshUsers(index + 1, users);
+                    refreshUsers(index + 1, users, fn);
                 });
             }
 
         });
     }
 
-    var refresh = function(wallet) {
-        $("#panel_transactions").empty();
+    var isSame = function(old_array, new_array) {
+        if (old_array.length != new_array.length) return false;
+        for (var i = 0; i < new_array.length; i++) {
+            if (JSON.stringify(old_array[i]) !== JSON.stringify(new_array[i])) return false;
+        }
+        return true;
+    }
+
+    var displayUsers = function(error, users) {
+        users.sort(compare_users);
+        if (isSame(old_users, users)) return;
         $("#panel_users").empty();
         $("#panel_removed_users").empty();
         $("#panel_current_user").empty();
+        old_users = users;
+        var cur_user = null;
+        for (var i = 0; i < users.length; i++) {
+            // find the current user
+            if (users[i].address == web3.eth.accounts[0]) cur_user = users[i];
+        }
+        $("#panel_current_user_heading").html("<h4>Current User Address: " + web3.eth.accounts[0] + "</h4");
+        if (cur_user == null) {
+            $("#panel_current_user").append("<h4>User Not Found</h4><p>Looks like you are not an active user of this wallet and can only view. You cannot perform any actions.</p>");
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].time_removed > 0) {
+                    $("#panel_removed_users").append(constructUserHtml(users[i]));
+                } else {
+                    $("#panel_users").append(constructUserHtml(users[i], "stronger"));
+                }
+            }
+        } else {
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].address == cur_user.address) {
+                    $("#panel_current_user").append(constructUserHtml(users[i], "cur_user"));
+                } else if (users[i].time_removed > 0) {
+                    $("#panel_removed_users").append(constructUserHtml(users[i]));
+                } else if (users[i].waiting_time < cur_user.waiting_time) {
+                    $("#panel_users").append(constructUserHtml(users[i], "stronger"));
+                } else {
+                    $("#panel_users").append(constructUserHtml(users[i], "weaker"));
+                }
+            }
+        }
+    }
+
+    var refresh = function(wallet) {
+        $("#panel_transactions").empty();
         $("#out_wallet_address").text("Wallet Address: " + wallet_address);
         wallet.balance(function(error, result) {
             $("#out_balance").text("Balance: " + web3.fromWei(result, 'ether') + " ETH");
@@ -207,7 +223,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
             $("#out_transaction_count").text("Transaction Count: " + result);
             refreshTransactions(result - 1, true);
         });
-        refreshUsers(0, []);
+        refreshUsers(0, [], displayUsers);
     }
 
    	$("#btn_initiate_transaction").click(function() {
