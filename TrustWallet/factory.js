@@ -18,6 +18,10 @@ var addWallet = function(index, trustWalletFactory, address_list, fn) {
 var startApp = function(web3) {
     var trustWalletFactory = getTrustWalletFactory(web3);
 
+    $("#btn_find_wallet").click(function() {
+        window.location.href = "wallet.html?wallet_address=" + $("#inp_wallet_address").val();
+    });
+
     $("#btn_create_wallet").click(function() {
         trustWalletFactory.createWallet(function(error, result) {
             if (error) {
