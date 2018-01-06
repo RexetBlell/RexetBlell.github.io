@@ -99,14 +99,27 @@ var constructUserHtml = function(obj, state) {
             buttons = '<button type="button" class="btn btn-default remove-user" address="' + obj.address + '">Remove</button>';
         }
     }
+
     var waiting_time_str;
     if (obj.waiting_time < 60) {
         waiting_time_str = obj.waiting_time + " seconds";
     } else {
         waiting_time_str = 'Around ' + moment.duration(obj.waiting_time, "seconds").humanize() + ' (' + obj.waiting_time + ' seconds)';
     }
-    var list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Waiting Time</h4> <p class="list-group-item-text">' + waiting_time_str + '</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Added By</h4> <p class="list-group-item-text">' + obj.added_by + '</p></div>';
+    var list_items = '';
+    if (state == "cur_user") {
+        if (obj.time_removed == 0) {
+            list_items += '<div class="list-group-item list-group-item-success"> <h4 class="list-group-item-heading">Status</h4> <p class="list-group-item-text">Active</p></div>';
+        } else {
+            list_items += '<div class="list-group-item list-group-item-danger"> <h4 class="list-group-item-heading">Status</h4> <p class="list-group-item-text">Removed</p></div>';
+        }
+    }
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Waiting Time</h4> <p class="list-group-item-text">' + waiting_time_str + '</p></div>';
+    if (obj.added_by == "0x0000000000000000000000000000000000000000") {
+        list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Added By</h4> <p class="list-group-item-text">Nobody (original wallet creator) </p></div>';
+    } else {
+        list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Added By</h4> <p class="list-group-item-text">' + obj.added_by + '</p></div>';
+    }
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Date Added</h4> <p class="list-group-item-text">' + moment.unix(obj.time_added).format(date_format) + '</p></div>';
     if (obj.time_removed == 0) {
         var time_until = Math.round(Math.max(0, obj.time_added - (Date.now() / 1000) + obj.waiting_time));
@@ -136,6 +149,7 @@ var constructUserHtml = function(obj, state) {
 var continueLoading = function(web3, wallet_address, wallet) {
 
     var old_users = [];
+    var old_cur_user = "";
     var old_transactions = [];
 
     var isSame = function(old_array, new_array) {
@@ -191,17 +205,18 @@ var continueLoading = function(web3, wallet_address, wallet) {
 
     var displayUsers = function(error, users) {
         users.sort(compare_users);
-        if (isSame(old_users, users)) return;
+        if (isSame(old_users, users) && old_cur_user == web3.eth.accounts[0]) return;
+        old_users = users;
+        old_cur_user = web3.eth.accounts[0];
         $("#panel_users").empty();
         $("#panel_removed_users").empty();
         $("#panel_current_user").empty();
-        old_users = users;
         var cur_user = null;
         for (var i = 0; i < users.length; i++) {
             // find the current user
             if (users[i].address == web3.eth.accounts[0]) cur_user = users[i];
         }
-        $("#panel_current_user_heading").html("<h4>Current User Address: " + web3.eth.accounts[0] + "</h4");
+        $("#panel_current_user_heading").html("<h4>Current User Address: " + web3.eth.accounts[0] + "</h4>");
         if (cur_user == null) {
             $("#panel_current_user").append("<h4>User Not Found</h4><p>Looks like you are not an active user of this wallet and can only view. You cannot perform any actions.</p>");
             for (var i = 0; i < users.length; i++) {
@@ -227,9 +242,11 @@ var continueLoading = function(web3, wallet_address, wallet) {
     }
 
     var refresh = function() {
-        $("#out_wallet_address").text("Wallet Address: " + wallet_address);
+        var target_text = "Wallet Address: " + wallet_address;
+        if ($("#out_wallet_address").text() != target_text) $("#out_wallet_address").text(target_text);
         wallet.balance(function(error, result) {
-            $("#out_balance").text("Balance: " + web3.fromWei(result, 'ether') + " ETH");
+            var target_text = "Balance: " + web3.fromWei(result, 'ether') + " ETH";
+            if ($("#out_balance").text() != target_text) $("#out_balance").text(target_text);
         });
 
         refreshTransactions(0, [], [], displayTransactions);
