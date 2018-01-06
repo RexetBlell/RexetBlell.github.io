@@ -68,7 +68,7 @@ var constructTransaction = function(tx, initiator) {
             list_items += '<div class="list-group-item list-group-item-danger"> <p class="list-group-item-text"> Can be executed in around ' + moment.duration(time_until, "seconds").humanize() + ' (' + time_until + ' seconds)</p></div>';
         }
         buttons += '<div class="btn-group">';
-        buttons += '<button type="button" class="btn btn-default" id="btn_finalize_transaction">Finalize Transaction</button>';
+        buttons += '<button type="button" class="btn btn-default" id="btn_finalize_transaction">Execute Transaction</button>';
         buttons += '<button type="button" class="btn btn-default" id="btn_cancel_transaction">Cancel Transaction</button>';
         buttons += '</div>';
     }
@@ -148,11 +148,12 @@ var constructUserHtml = function(obj, state) {
 
 var continueLoading = function(web3, wallet_address, wallet) {
 
-    var old_users = [];
+    var old_users = null;
     var old_cur_user = "";
-    var old_transactions = [];
+    var old_transactions = null;
 
     var isSame = function(old_array, new_array) {
+        if (old_array == null || new_array == null) return false;
         if (old_array.length != new_array.length) return false;
         for (var i = 0; i < new_array.length; i++) {
             if (JSON.stringify(old_array[i]) !== JSON.stringify(new_array[i])) return false;
@@ -180,6 +181,9 @@ var continueLoading = function(web3, wallet_address, wallet) {
         $("#panel_transactions").empty();
         $("#out_transaction_count").text("Transaction Count: " + transactions.length);
         old_transactions = transactions;
+        if (transactions.length == 0) {
+            $("#panel_transactions").append("<p>No Transactions</p>");
+        }
         for (var i = transactions.length - 1; i >= 0; i--) {
             $("#panel_transactions").append(constructTransaction(transactions[i], transactionInitiators[i]));
         }

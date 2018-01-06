@@ -20,9 +20,11 @@ var startApp = function(web3) {
 
     $("#btn_create_wallet").click(function() {
         trustWalletFactory.createWallet(function(error, result) {
-            web3.eth.getTransactionReceipt(result, function(error, result) {
-                alert(result);
-            });
+            if (error) {
+                alert(error);
+            } else {
+                console.log(result);
+            }
         });
     });
 
