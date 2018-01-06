@@ -1,16 +1,55 @@
-var constructWallet = function(wallet_address) {
-    var button = '<a href="wallet.html?wallet_address=' + wallet_address + '" type="button" class="btn btn-default btn-block btn-lg">' + wallet_address + '</a>';
-    return button;
+var constructWallet = function(web3, wallet_info_obj) {
+    var list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Address</h4> <p class="list-group-item-text">' + wallet_info_obj.address + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Created</h4> <p class="list-group-item-text">' +
+        moment.unix(wallet_info_obj.time_created).format(date_format) + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Balance</h4> <p class="list-group-item-text">' + web3.fromWei(wallet_info_obj.balance, "ether") + ' ETH</p></div>';
+    var button = '<a href="wallet.html?wallet_address=' + wallet_info_obj.address + '" type="button" class="btn btn-default">View Wallet</a>';
+    return '<div class="panel panel-primary"> <div class="panel-body"> <div class="list-group">' + list_items + '</div>' + button + '</div> </div>';
 }
 
-var addWallet = function(index, trustWalletFactory, address_list, fn) {
+var addWallet = function(index, trustWalletFactory, wallets, fn) {
+
+    var wallet_info_obj = {};
+    var wallet = null;
+
+    var handleDateCreated = function(error, user_address) {
+        // the input should be the first user address
+        if (error) {
+            alert(error);
+        } else {
+            wallet.users(user_address, function(error, user_info) {
+                var user = constructUserObject(user_address, user_info);
+                wallet_info_obj.time_created = user.time_added;
+                wallets.push(wallet_info_obj);
+                addWallet(index + 1, trustWalletFactory, wallets, fn)
+            });
+        }
+
+    }
+
+    var handleBalance = function(error, result) {
+        if (error) {
+            alert(error);
+        } else {
+            wallet_info_obj.balance = result;
+            wallet.userAddresses(0, handleDateCreated);
+        }
+    }
+
 
     trustWalletFactory.wallets(web3.eth.accounts[0], index, function(error, wallet_address) {
-        if (wallet_address != "0x") {
-            address_list.push(wallet_address);
-            addWallet(index + 1, trustWalletFactory, address_list, fn)
+        if (wallet_address == "0x") {
+            fn(null, wallets);
         } else {
-            fn(null, address_list);
+            getTrustWallet(web3, wallet_address, function(error, result) {
+                if (error) {
+                    alert(error);
+                } else {
+                    wallet_info_obj.address = wallet_address;
+                    wallet = result;
+                    wallet.balance(handleBalance)
+                }
+            });
         }
     });
 }
@@ -47,7 +86,7 @@ var startApp = function(web3) {
                     $("#panel_wallets").append("<h4>No wallets were created by this address</h4><p>Start by creating a new wallet, or finding a link to an existing one.</p>");
                 } else {
                     for (var i = 0; i < address_list.length; i++) {
-                        $("#panel_wallets").append(constructWallet(address_list[i]));
+                        $("#panel_wallets").append(constructWallet(web3, address_list[i]));
                     }
                 }
             }

@@ -1,5 +1,3 @@
-var date_format = "MMMM DD YYYY, HH:mm:ss";
-
 function getParameterByName(name) {
     var url = window.location.href;
     var name = name.replace(/[\[\]]/g, "\\$&");
@@ -68,26 +66,13 @@ var constructTransaction = function(tx, initiator) {
             list_items += '<div class="list-group-item list-group-item-danger"> <p class="list-group-item-text"> Can be executed in around ' + moment.duration(time_until, "seconds").humanize() + ' (' + time_until + ' seconds)</p></div>';
         }
         buttons += '<div class="btn-group">';
-        buttons += '<button type="button" class="btn btn-default" id="btn_finalize_transaction">Execute Transaction</button>';
+        buttons += '<button type="button" class="btn btn-default" id="btn_finalize_transaction">Finalize Transaction</button>';
         buttons += '<button type="button" class="btn btn-default" id="btn_cancel_transaction">Cancel Transaction</button>';
         buttons += '</div>';
     }
 
     return '<div class="panel panel-' + panel_status + '"> <div class="panel-heading">' + title + '</div> <div class="panel-body"> <div class="list-group">' + list_items + '</div>' + buttons + '</div> </div>';
 
-}
-
-var constructUserObject = function(address, userContent) {
-    var obj = {
-        address: address,
-        waiting_time: userContent[0].toNumber(),
-        added_by: userContent[1],
-        time_added: userContent[2].toNumber(),
-        removed_by: userContent[3],
-        time_removed: userContent[4].toNumber(),
-        time_added_another_user: userContent[5].toNumber()
-    };
-    return obj;
 }
 
 var constructUserHtml = function(obj, state) {
