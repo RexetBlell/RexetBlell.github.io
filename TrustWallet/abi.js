@@ -1,4 +1,4 @@
-var getTrustWalletFactory = function(web3) {
+var getTrustWalletFactory = function(web3, fn) {
 
     var contractABI = [{
         "constant": true,
@@ -36,9 +36,15 @@ var getTrustWalletFactory = function(web3) {
 
     var ropsten_address = "0x3287b89f553f903da1a0ec67e5eb184b5f4bc53b";
     var abstract_contract = web3.eth.contract(contractABI);
-    var specific_contract = abstract_contract.at(ropsten_address);
 
-    return specific_contract;
+    web3.eth.getCode(ropsten_address, function(error, result) {
+        if (!error && result.length == 8704) {
+            var specific_contract = abstract_contract.at(ropsten_address);
+            fn(null, specific_contract);
+        } else {
+            fn("No TrustWallet Factory contract found at this address: " + ropsten_address, null);
+        }
+    });
 }
 
 var getTrustWallet = function(web3, address, fn) {
@@ -297,5 +303,3 @@ var getTrustWallet = function(web3, address, fn) {
         });
     }
 }
-
-0xb3efdd96780951b7b20094edebacd2a2bae95623

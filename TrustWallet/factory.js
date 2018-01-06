@@ -36,7 +36,6 @@ var addWallet = function(index, trustWalletFactory, wallets, fn) {
         }
     }
 
-
     trustWalletFactory.wallets(web3.eth.accounts[0], index, function(error, wallet_address) {
         if (wallet_address == "0x") {
             fn(null, wallets);
@@ -55,7 +54,6 @@ var addWallet = function(index, trustWalletFactory, wallets, fn) {
 }
 
 var startApp = function(web3) {
-    var trustWalletFactory = getTrustWalletFactory(web3);
 
     $("#btn_find_wallet").click(function() {
         window.location.href = "wallet.html?wallet_address=" + $("#inp_wallet_address").val();
@@ -65,40 +63,46 @@ var startApp = function(web3) {
         window.location.href = "https://ropsten.etherscan.io/address/0x3287b89f553f903da1a0ec67e5eb184b5f4bc53b";
     });
 
-    $("#btn_create_wallet").click(function() {
-        trustWalletFactory.createWallet(function(error, result) {
-            if (error) {
-                alert(error);
-            } else {
-                console.log(result);
-            }
-        });
-    });
-
-    var address_list = null;
-
-    var refresh = function() {
-        var target_text = "Wallets created by " + web3.eth.accounts[0];
-        if ($("#panel_wallets_title").text() != target_text) {
-            $("#panel_wallets_title").text(target_text);
-        }
-        addWallet(0, trustWalletFactory, [], function(error, result) {
-            if (address_list == null || result.length != address_list.length) {
-                address_list = result;
-                $("#panel_wallets").empty();
-                if (address_list.length == 0) {
-                    $("#panel_wallets").append("<h4>No wallets were created by this address</h4><p>Start by creating a new wallet, or finding a link to an existing one.</p>");
-                } else {
-                    for (var i = 0; i < address_list.length; i++) {
-                        $("#panel_wallets").append(constructWallet(web3, address_list[i]));
+    getTrustWalletFactory(web3, function(error, trustWalletFactory) {
+        if (error) {
+            alert(error);
+        } else {
+            $("#btn_create_wallet").click(function() {
+                trustWalletFactory.createWallet(function(error, result) {
+                    if (error) {
+                        alert(error);
+                    } else {
+                        console.log(result);
                     }
-                }
-            }
-        });
-    }
+                });
+            });
 
-    refresh();
-    setInterval(refresh, 1000);
+            var address_list = null;
+
+            var refresh = function() {
+                var target_text = "Wallets created by " + web3.eth.accounts[0];
+                if ($("#panel_wallets_title").text() != target_text) {
+                    $("#panel_wallets_title").text(target_text);
+                }
+                addWallet(0, trustWalletFactory, [], function(error, result) {
+                    if (address_list == null || result.length != address_list.length) {
+                        address_list = result;
+                        $("#panel_wallets").empty();
+                        if (address_list.length == 0) {
+                            $("#panel_wallets").append("<h4>No wallets were created by this address</h4><p>Start by creating a new wallet, or finding a link to an existing one.</p>");
+                        } else {
+                            for (var i = 0; i < address_list.length; i++) {
+                                $("#panel_wallets").append(constructWallet(web3, address_list[i]));
+                            }
+                        }
+                    }
+                });
+            }
+
+            refresh();
+            setInterval(refresh, 1000);
+        }
+    });
 }
 
 $(function() {
