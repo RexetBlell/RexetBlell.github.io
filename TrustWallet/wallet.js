@@ -261,6 +261,9 @@ var continueLoading = function(web3, wallet_address, wallet) {
                         alert("Error: " + error);
                     } else {
                         show_transaction_created(result);
+                        $("#inp_destination").val('');
+                        $("#inp_value").val('');
+                        $("#inp_data").val('');
                     }
                 });
             }
@@ -297,6 +300,8 @@ var continueLoading = function(web3, wallet_address, wallet) {
                         alert("Error: " + error);
                     } else {
                         show_transaction_created(result);
+                        $("#inp_new_user_waiting_time").val("");
+                        $("#inp_new_user_address").val("");
                     }
                 });
             }
@@ -363,6 +368,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
                 if (error) {
                     alert("Error: " + error);
                 } else {
+                    $("#inp_deposit_amount").val("");
                     show_transaction_created(result);
                 }
             });
