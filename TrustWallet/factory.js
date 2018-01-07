@@ -72,7 +72,7 @@ var startApp = function(web3) {
                     if (error) {
                         alert(error);
                     } else {
-                        console.log(result);
+                        show_transaction_created(result);
                     }
                 });
             });

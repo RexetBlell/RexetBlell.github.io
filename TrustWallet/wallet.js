@@ -260,7 +260,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
                     if (error) {
                         alert("Error: " + error);
                     } else {
-                        console.log(result);
+                        show_transaction_created(result);
                     }
                 });
             }
@@ -296,7 +296,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
                     if (error) {
                         alert("Error: " + error);
                     } else {
-                        console.log(result);
+                        show_transaction_created(result);
                     }
                 });
             }
@@ -313,7 +313,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
                         if (error) {
                             alert("Error: " + error);
                         } else {
-                            console.log(result);
+                            show_transaction_created(result);
                         }
                     });
                 }
@@ -327,7 +327,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
                         if (error) {
                             alert("Error: " + error);
                         } else {
-                            console.log(result);
+                            show_transaction_created(result);
                         }
                     });
                 }
@@ -345,7 +345,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
                     if (error) {
                         alert("Error: " + error);
                     } else {
-                        console.log(result);
+                        show_transaction_created(result);
                     }
                 });
             }
@@ -363,7 +363,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
                 if (error) {
                     alert("Error: " + error);
                 } else {
-                    console.log(result);
+                    show_transaction_created(result);
                 }
             });
         } catch (err) {
