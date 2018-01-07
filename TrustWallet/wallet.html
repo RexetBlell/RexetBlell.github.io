@@ -40,13 +40,12 @@
             <h4 id="out_wallet_address"></h4>
             <h4 id="out_balance"></h4>
             <h4 id="out_transaction_count"></h4>
-            <div class="input-group">
-              <input type="text" class="form-control" placeholder="Deposit Amount" id="inp_deposit_amount" aria-describedby="basic-addon2">
-              <span class="input-group-addon" id="basic-addon2">ETH</span>
-              <span class="input-group-btn">
-                <button type="button" class="btn btn-success" id="btn_deposit">Deposit</button>
-              </span>
-            </div>
+            <form class="form-inline">
+              <div class="form-group">
+                <input type="text" class="form-control" placeholder="Value (ETH)" id="inp_deposit_amount" aria-describedby="basic-addon2">
+              </div>
+              <button type="button" class="btn btn-success" id="btn_deposit">Deposit</button>
+            </form>
           </div>
         </div>
         <div class="panel panel-default">
@@ -86,9 +85,18 @@
                   <label for="inp_destination">User Address</label>
                   <input type="text" class="form-control" id="inp_new_user_address" placeholder="New User Address">
                 </div>
-                <div class="form-group">
-                  <label for="inp_destination">Waiting Time</label>
-                  <input type="text" class="form-control" id="inp_new_user_waiting_time" placeholder="Waiting Time (Seconds)">
+                <label for="waiting_time_group">Waiting Time</label>
+                <div class="form-group form-inline" id="waiting_time_group">
+                  <input type="text" class="form-control" id="inp_new_user_waiting_time">
+                  <select class="form-control" id="inp_waiting_time_units">
+                    <option>seconds</option>
+                    <option>minutes</option>
+                    <option>hours</option>
+                    <option selected="selected">days</option>
+                    <option>weeks</option>
+                    <option>months</option>
+                    <option>years</option>
+                  </select>
                 </div>
                 <button type="button" class="btn btn-default" id="btn_add_user">Add User</button>
               </form>

@@ -269,7 +269,25 @@ var continueLoading = function(web3, wallet_address, wallet) {
 
    	$("#btn_add_user").click(function() {
         var user_address = $("#inp_new_user_address").val();
-        var waiting_time = $("#inp_new_user_waiting_time").val(); // TODO: make specifying this easier
+        if (user_address.length != 42) {
+            alert("Enter a valid Ethereum address.");
+            return;
+        }
+        var mult = 1;
+        if ($("#inp_waiting_time_units" ).val() == "minutes") {
+            mult = 60;
+        } else if ($("#inp_waiting_time_units" ).val() == "hours") {
+            mult = 3600;
+        } else if ($("#inp_waiting_time_units" ).val() == "days") {
+            mult = 3600 * 24;
+        } else if ($("#inp_waiting_time_units" ).val() == "weeks") {
+            mult = 3600 * 24 * 7;
+        } else if ($("#inp_waiting_time_units" ).val() == "months") {
+            mult = 3600 * 24 * 30;
+        } else if ($("#inp_waiting_time_units" ).val() == "years") {
+            mult = 3600 * 24 * 365;
+        }
+        var waiting_time = $("#inp_new_user_waiting_time").val() * mult;
         wallet.addUser.estimateGas(user_address, waiting_time, {from: web3.eth.accounts[0]}, function(error, result) {
             if (error || result > 3000000) {
                 alert("Error.\n-You must be an active user of this wallet\n-The user you are trying to add must not already exist\n-The user you are trying to add must not have been removed\n-The waiting time of the user you are trying to add must be higher than or equal to your waiting time");
@@ -335,14 +353,22 @@ var continueLoading = function(web3, wallet_address, wallet) {
     });
 
     $("#btn_deposit").click(function() {
-        var value = $("#inp_deposit_amount").val();
-        web3.eth.sendTransaction({to: wallet.address, value: web3.toWei(value, 'ether')}, function(error, result) {
-            if (error) {
-                alert("Error: " + error);
-            } else {
-                console.log(result);
+        try {
+            var value = web3.toWei($("#inp_deposit_amount").val(), 'ether');
+            if (value == 0) {
+                alert("Enter a deposit amount greater than zero");
+                return;
             }
-        });
+            web3.eth.sendTransaction({to: wallet.address, value: value}, function(error, result) {
+                if (error) {
+                    alert("Error: " + error);
+                } else {
+                    console.log(result);
+                }
+            });
+        } catch (err) {
+            alert("You entered an invalid deposit amount.\n" + err);
+        }
     });
 
     refresh();
@@ -380,5 +406,4 @@ $(function() {
     }
 
     getWeb3(startApp);
-
 });
