@@ -398,6 +398,8 @@ var startApp = function(web3) {
 
 $(function() {
 
+    $('[data-toggle="tooltip"]').tooltip();
+
     function getWeb3(callback) {
         if (typeof window.web3 === 'undefined') {
             // no web3, use fallback

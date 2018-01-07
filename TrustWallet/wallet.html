@@ -58,7 +58,7 @@
             <h4 id="out_transaction_count"></h4>
             <form class="form-inline">
               <div class="form-group">
-                <input type="text" class="form-control" placeholder="Value (ETH)" id="inp_deposit_amount" aria-describedby="basic-addon2">
+                <input type="text" class="form-control" placeholder="Value (ETH)" id="inp_deposit_amount" aria-describedby="basic-addon2" data-toggle="tooltip" data-placement="bottom" title="How much Ether you want to deposit into this wallet.">
               </div>
               <button type="button" class="btn btn-success" id="btn_deposit">Deposit</button>
             </form>
@@ -85,7 +85,7 @@
                 </div>
                 <div class="form-group">
                   <label for="inp_data">Data</label>
-                  <input type="text" class="form-control" id="inp_data" placeholder="Data">
+                  <input type="text" class="form-control" id="inp_data" placeholder="Data" data-toggle="tooltip" title="You should leave this blank unless you are an advanced user. This field allows this transaction to be a contract call.">
                 </div>
                 <button type="button" class="btn btn-default" id="btn_initiate_transaction">Initiate Transaction</button>
               </form> 
@@ -103,7 +103,7 @@
                 </div>
                 <label for="waiting_time_group">Waiting Time</label>
                 <div class="form-group form-inline" id="waiting_time_group">
-                  <input type="text" class="form-control" id="inp_new_user_waiting_time">
+                  <input type="text" class="form-control" id="inp_new_user_waiting_time" data-toggle="tooltip" title="How long the new user must wait between initiating a transaction and being able to execute it.">
                   <select class="form-control" id="inp_waiting_time_units">
                     <option>seconds</option>
                     <option>minutes</option>
