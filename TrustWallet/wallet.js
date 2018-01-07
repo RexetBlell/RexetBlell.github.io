@@ -63,7 +63,7 @@ var constructTransaction = function(tx, initiator) {
         if (time_until == 0) {
             list_items += '<div class="list-group-item list-group-item-success"> <p class="list-group-item-text">Can be executed now</p></div>';
         } else {
-            list_items += '<div class="list-group-item list-group-item-danger"> <p class="list-group-item-text"> Can be executed in around ' + moment.duration(time_until, "seconds").humanize() + ' (' + time_until + ' seconds)</p></div>';
+            list_items += '<div class="list-group-item list-group-item-danger"> <p class="list-group-item-text"> Can be executed in around ' + moment.duration(time_until, "seconds").humanize() + '</p></div>';
         }
         buttons += '<div class="btn-group">';
         buttons += '<button type="button" class="btn btn-default" id="btn_finalize_transaction">Finalize Transaction</button>';
@@ -89,7 +89,7 @@ var constructUserHtml = function(obj, state) {
     if (obj.waiting_time < 60) {
         waiting_time_str = obj.waiting_time + " seconds";
     } else {
-        waiting_time_str = 'Around ' + moment.duration(obj.waiting_time, "seconds").humanize() + ' (' + obj.waiting_time + ' seconds)';
+        waiting_time_str = 'Around ' + moment.duration(obj.waiting_time, "seconds").humanize();
     }
     var list_items = '';
     if (state == "cur_user") {
@@ -111,7 +111,7 @@ var constructUserHtml = function(obj, state) {
         if (time_until == 0) {
             list_items += '<div class="list-group-item list-group-item-success"> <p class="list-group-item-text">Can add another user now</p></div>';
         } else {
-            list_items += '<div class="list-group-item list-group-item-danger"> <p class="list-group-item-text">Can add another user in around ' + moment.duration(time_until, "seconds").humanize() + ' (' + time_until + ' seconds)</p></div>';
+            list_items += '<div class="list-group-item list-group-item-danger"> <p class="list-group-item-text">Can add another user in around ' + moment.duration(time_until, "seconds").humanize() + '</p></div>';
         }
     } else {
         list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Removed By</h4> <p class="list-group-item-text">' + obj.removed_by + '</p></div>';
@@ -132,10 +132,6 @@ var constructUserHtml = function(obj, state) {
 }
 
 var continueLoading = function(web3, wallet_address, wallet) {
-
-    var old_users = null;
-    var old_cur_user = "";
-    var old_transactions = null;
 
     $("#btn_etherscan").click(function() {
         window.location.href = "https://ropsten.etherscan.io/address/" + wallet_address;
@@ -166,15 +162,16 @@ var continueLoading = function(web3, wallet_address, wallet) {
     }
 
     var displayTransactions = function(error, transactions, transactionInitiators) {
-        if (isSame(old_transactions, transactions)) return;
-        $("#panel_transactions").empty();
         $("#out_transaction_count").text("Transaction Count: " + transactions.length);
-        old_transactions = transactions;
         if (transactions.length == 0) {
             $("#panel_transactions").append("<p>No Transactions</p>");
         }
+        var all_transactions = ''
         for (var i = transactions.length - 1; i >= 0; i--) {
-            $("#panel_transactions").append(constructTransaction(transactions[i], transactionInitiators[i]));
+            all_transactions += constructTransaction(transactions[i], transactionInitiators[i]);
+        }
+        if ($("#panel_transactions").html() != all_transactions) {
+            $("#panel_transactions").html(all_transactions);
         }
     }
 
@@ -198,40 +195,43 @@ var continueLoading = function(web3, wallet_address, wallet) {
 
     var displayUsers = function(error, users) {
         users.sort(compare_users);
-        if (isSame(old_users, users) && old_cur_user == web3.eth.accounts[0]) return;
-        old_users = users;
-        old_cur_user = web3.eth.accounts[0];
-        $("#panel_users").empty();
-        $("#panel_removed_users").empty();
-        $("#panel_current_user").empty();
+
+        var panel_users_new_content = "";
+        var panel_removed_users_new_content = "";
+        var panel_current_user_new_content = "";
+
         var cur_user = null;
         for (var i = 0; i < users.length; i++) {
-            // find the current user
             if (users[i].address == web3.eth.accounts[0]) cur_user = users[i];
         }
-        $("#panel_current_user_heading").html("<h4>Current User Address: " + web3.eth.accounts[0] + "</h4>");
+        var target_heading = "<h4>Current User Address: " + web3.eth.accounts[0] + "</h4>";
+        if ($("#panel_current_user_heading").html() != target_heading) $("#panel_current_user_heading").html(target_heading);
         if (cur_user == null) {
-            $("#panel_current_user").append("<h4>User Not Found</h4><p>Looks like you are not an active user of this wallet and can only view. You cannot perform any actions.</p>");
+            panel_current_user_new_content += "<h4>User Not Found</h4><p>Looks like you are not an active user of this wallet and can only view. You cannot perform any actions.</p>";
             for (var i = 0; i < users.length; i++) {
                 if (users[i].time_removed > 0) {
-                    $("#panel_removed_users").append(constructUserHtml(users[i]));
+                    panel_removed_users_new_content += constructUserHtml(users[i]);
                 } else {
-                    $("#panel_users").append(constructUserHtml(users[i], "stronger"));
+                    panel_users_new_content += constructUserHtml(users[i], "stronger");
                 }
             }
         } else {
             for (var i = 0; i < users.length; i++) {
                 if (users[i].address == cur_user.address) {
-                    $("#panel_current_user").append(constructUserHtml(users[i], "cur_user"));
+                    panel_current_user_new_content += constructUserHtml(users[i], "cur_user");
                 } else if (users[i].time_removed > 0) {
-                    $("#panel_removed_users").append(constructUserHtml(users[i]));
+                    panel_removed_users_new_content += constructUserHtml(users[i]);
                 } else if (users[i].waiting_time < cur_user.waiting_time) {
-                    $("#panel_users").append(constructUserHtml(users[i], "stronger"));
+                    panel_users_new_content += constructUserHtml(users[i], "stronger");
                 } else {
-                    $("#panel_users").append(constructUserHtml(users[i], "weaker"));
+                    panel_users_new_content += constructUserHtml(users[i], "weaker");
                 }
             }
         }
+
+        if ($("#panel_users").html() != panel_users_new_content) $("#panel_users").html(panel_users_new_content);
+        if ($("#panel_removed_users").html() != panel_removed_users_new_content) $("#panel_removed_users").html(panel_removed_users_new_content);
+        if ($("#panel_current_user").html() != panel_current_user_new_content) $("#panel_current_user").html(panel_current_user_new_content);
     }
 
     var refresh = function() {
@@ -320,17 +320,17 @@ var continueLoading = function(web3, wallet_address, wallet) {
             });
         } else if ($(this).attr('id') == 'btn_cancel_transaction') {
             wallet.cancelTransaction.estimateGas({from: web3.eth.accounts[0]}, function(error, result) {
-                wallet.cancelTransaction({from: web3.eth.accounts[0]}, function(error, result) {
-                    if (error || result > 3000000) {
-                        alert("Error.\n-You must be an active user of this wallet\n-Your waiting time must be lower than or equal to the waiting time of the transaction initiator");
-                    } else {
+                if (error || result > 3000000) {
+                    alert("Error.\n-You must be an active user of this wallet\n-Your waiting time must be lower than or equal to the waiting time of the transaction initiator");
+                } else {
+                    wallet.cancelTransaction({from: web3.eth.accounts[0]}, function(error, result) {
                         if (error) {
                             alert("Error: " + error);
                         } else {
                             console.log(result);
                         }
-                    }
-                });
+                    });
+                }
             });
         }
     });
