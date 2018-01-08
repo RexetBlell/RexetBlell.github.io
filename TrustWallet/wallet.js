@@ -63,10 +63,11 @@ var constructTransaction = function(tx, initiator) {
         if (time_until == 0) {
             list_items += '<div class="list-group-item list-group-item-success"> <p class="list-group-item-text">Can be executed now</p></div>';
         } else {
-            list_items += '<div class="list-group-item list-group-item-danger"> <p class="list-group-item-text"> Can be executed in around ' + moment.duration(time_until, "seconds").humanize() + '</p></div>';
+            var when_execute_str = "Can be executed " + moment.unix(tx.time_initiated + initiator.waiting_time).format(date_format) + " (In around " + moment.duration(time_until, "seconds").humanize() + ")";
+            list_items += '<div class="list-group-item list-group-item-danger"> <p class="list-group-item-text">' + when_execute_str + '</p></div>';
         }
         buttons += '<div class="btn-group">';
-        buttons += '<button type="button" class="btn btn-default" id="btn_finalize_transaction">Finalize Transaction</button>';
+        buttons += '<button type="button" class="btn btn-default" id="btn_finalize_transaction">Execute Transaction</button>';
         buttons += '<button type="button" class="btn btn-default" id="btn_cancel_transaction">Cancel Transaction</button>';
         buttons += '</div>';
     }
@@ -293,7 +294,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
         var waiting_time = $("#inp_new_user_waiting_time").val() * mult;
         wallet.addUser.estimateGas(user_address, waiting_time, {from: web3.eth.accounts[0]}, function(error, result) {
             if (error || result > 3000000) {
-                alert("Error.\n-You must be an active user of this wallet\n-The user you are trying to add must not already exist\n-The user you are trying to add must not have been removed\n-The waiting time of the user you are trying to add must be higher than or equal to your waiting time");
+                alert("Error.\n-You must be an active user of this wallet\n-Your waiting time must have passed since you added another user or since you were added to this wallet\n-The user you are trying to add must not already exist\n-The user you are trying to add must not have been removed\n-The waiting time of the user you are trying to add must be higher than or equal to your waiting time");
             } else {
                 wallet.addUser(user_address, waiting_time, {from: web3.eth.accounts[0]}, function(error, result) {
                     if (error) {
