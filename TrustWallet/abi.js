@@ -1,4 +1,4 @@
-var getTrustWalletFactory = function(web3, fn) {
+var getTrustWalletFactory = function(web3, netId, fn) {
 
     var contractABI = [{
         "constant": true,
@@ -36,6 +36,11 @@ var getTrustWalletFactory = function(web3, fn) {
 
     var ropsten_address = "0x3287b89f553f903da1a0ec67e5eb184b5f4bc53b";
     var abstract_contract = web3.eth.contract(contractABI);
+
+    if (netId != 3) {
+        alert("Currently works only on Ropsten");
+        return;
+    }
 
     web3.eth.getCode(ropsten_address, function(error, result) {
         if (!error && result.length == 8704) {
