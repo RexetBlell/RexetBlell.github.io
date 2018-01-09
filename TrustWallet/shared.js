@@ -7,8 +7,14 @@ var show_message = function(title, message) {
 }
 
 var show_transaction_created = function(tx_hash) {
-  show_message("Transaction Sent",
-      "This might take a few minutes depending on the network conditions and the gas price you set. Transaction hash: " + tx_hash);
+    var link = "";
+    if (window.netId == 1) {
+        link = '<a href="https://etherscan.io/tx/' + tx_hash + '">' + tx_hash + '</a>';
+    } else if (window.netId == 3) {
+        link = '<a href="https://ropsten.etherscan.io/tx/' + tx_hash + '">' + tx_hash + '</a>';
+    }
+    show_message("Transaction Sent",
+      "This might take a few minutes depending on the network conditions and the gas price you set. Transaction: " + link);
 }
 
 var constructUserObject = function(address, userContent) {

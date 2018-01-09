@@ -60,14 +60,21 @@ var startApp = function(web3) {
     });
 
     $("#btn_etherscan").click(function() {
-        window.location.href = "https://ropsten.etherscan.io/address/0x3287b89f553f903da1a0ec67e5eb184b5f4bc53b";
+        if (window.netId == 1) {
+            window.location.href = "https://etherscan.io/address/0xaf98a2bc242d93b5206b2ea7cf26e31d82c5873b";
+        } else if (window.netId == 3) {
+            window.location.href = "https://ropsten.etherscan.io/address/0x3287b89f553f903da1a0ec67e5eb184b5f4bc53b";
+        } else {
+            alert("You must be on Main Net or Ropsten.");
+        }
     });
 
     web3.version.getNetwork(function(error, netId) {
         if (error) {
             alert(error);
         } else {
-            getTrustWalletFactory(web3, netId, function(error, trustWalletFactory) {
+            window.netId = netId;
+            getTrustWalletFactory(web3, function(error, trustWalletFactory) {
                 if (error) {
                     alert(error);
                 } else {
@@ -84,6 +91,15 @@ var startApp = function(web3) {
                     var address_list = null;
 
                     var refresh = function() {
+
+                        web3.version.getNetwork(function(error, netId) {
+                            if (error) {
+                                alert(error);
+                            } else {
+                                window.netId = netId;
+                            }
+                        });
+
                         var target_text = "Wallets created by " + web3.eth.accounts[0];
                         if ($("#panel_wallets_title").text() != target_text) {
                             $("#panel_wallets_title").text(target_text);

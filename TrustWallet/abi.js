@@ -1,4 +1,4 @@
-var getTrustWalletFactory = function(web3, netId, fn) {
+var getTrustWalletFactory = function(web3, fn) {
 
     var contractABI = [{
         "constant": true,
@@ -35,21 +35,34 @@ var getTrustWalletFactory = function(web3, netId, fn) {
 
 
     var ropsten_address = "0x3287b89f553f903da1a0ec67e5eb184b5f4bc53b";
+    var mainnet_address = "0xaf98a2bc242d93b5206b2ea7cf26e31d82c5873b";
     var abstract_contract = web3.eth.contract(contractABI);
 
-    if (netId != 3) {
-        alert("Currently works only on Ropsten");
+    if (window.netId == 1) {
+        // Main Net
+        web3.eth.getCode(mainnet_address, function(error, result) {
+            if (!error && result.length == 8704) {
+                var specific_contract = abstract_contract.at(mainnet_address);
+                fn(null, specific_contract);
+            } else {
+                fn("No TrustWallet Factory contract found at this Main Net address: " + mainnet_address, null);
+            }
+        });
+    } else if (window.netId == 3) {
+        // Ropsten
+        web3.eth.getCode(ropsten_address, function(error, result) {
+            if (!error && result.length == 8704) {
+                var specific_contract = abstract_contract.at(ropsten_address);
+                fn(null, specific_contract);
+            } else {
+                fn("No TrustWallet Factory contract found at this Ropsten address: " + ropsten_address, null);
+            }
+        });
+    } else {
+        alert("TrustWallet currently works only on Main Net or Ropsten");
         return;
     }
 
-    web3.eth.getCode(ropsten_address, function(error, result) {
-        if (!error && result.length == 8704) {
-            var specific_contract = abstract_contract.at(ropsten_address);
-            fn(null, specific_contract);
-        } else {
-            fn("No TrustWallet Factory contract found at this address: " + ropsten_address, null);
-        }
-    });
 }
 
 var getTrustWallet = function(web3, address, fn) {

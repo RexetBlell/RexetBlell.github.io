@@ -135,7 +135,13 @@ var constructUserHtml = function(obj, state) {
 var continueLoading = function(web3, wallet_address, wallet) {
 
     $("#btn_etherscan").click(function() {
-        window.location.href = "https://ropsten.etherscan.io/address/" + wallet_address;
+        if (window.netId == 1) {
+            window.location.href = "https://etherscan.io/address/" + wallet_address;
+        } else if (window.netId == 3) {
+            window.location.href = "https://ropsten.etherscan.io/address/" + wallet_address;
+        } else {
+            alert("You must be on Main Net or Ropsten.");
+        }
     });
 
     var isSame = function(old_array, new_array) {
@@ -236,6 +242,15 @@ var continueLoading = function(web3, wallet_address, wallet) {
     }
 
     var refresh = function() {
+
+        web3.version.getNetwork(function(error, netId) {
+            if (error) {
+                alert(error);
+            } else {
+                window.netId = netId;
+            }
+        });
+
         var target_text = "Wallet Address: " + wallet_address;
         if ($("#out_wallet_address").text() != target_text) $("#out_wallet_address").text(target_text);
         wallet.balance(function(error, result) {
@@ -387,12 +402,19 @@ var startApp = function(web3) {
         window.location.href = "wallet.html?wallet_address=" + $("#inp_wallet_address").val();
     });
 
-    var wallet_address = getParameterByName("wallet_address");
-    var wallet = getTrustWallet(web3, wallet_address, function(error, result) {
+    web3.version.getNetwork(function(error, netId) {
         if (error) {
             alert(error);
         } else {
-            continueLoading(web3, wallet_address, result);
+            window.netId = netId;
+            var wallet_address = getParameterByName("wallet_address");
+            var wallet = getTrustWallet(web3, wallet_address, function(error, result) {
+                if (error) {
+                    alert(error);
+                } else {
+                    continueLoading(web3, wallet_address, result);
+                }
+            });
         }
     });
 }
