@@ -94,7 +94,7 @@ var constructUserHtml = function(obj, state) {
             list_items += '<div class="list-group-item list-group-item-danger"> <h4 class="list-group-item-heading">Status</h4> <p class="list-group-item-text">Removed</p></div>';
         }
     }
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Waiting Time</h4> <p class="list-group-item-text">' + delay_str + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Delay</h4> <p class="list-group-item-text">' + delay_str + '</p></div>';
     if (obj.added_by == "0x0000000000000000000000000000000000000000") {
         list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Added By</h4> <p class="list-group-item-text">Nobody (original wallet creator) </p></div>';
     } else {
@@ -303,7 +303,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
         var delay = $("#inp_new_user_delay").val() * mult;
         wallet.addUser.estimateGas(user_address, delay, {from: web3.eth.accounts[0]}, function(error, result) {
             if (error || result > 3000000) {
-                alert("Error.\n-You must be an active user of this wallet\n-Your waiting time must have passed since you added another user or since you were added to this wallet\n-The user you are trying to add must not already exist\n-The user you are trying to add must not have been removed\n-The waiting time of the user you are trying to add must be higher than or equal to your waiting time");
+                alert("Error.\n-You must be an active user of this wallet\n-Your delay time must have passed since you added another user or since you were added to this wallet\n-The user you are trying to add must not already exist\n-The user you are trying to add must not have been removed\n-The delay time of the user you are trying to add must be higher than or equal to your delay time");
             } else {
                 wallet.addUser(user_address, delay, {from: web3.eth.accounts[0]}, function(error, result) {
                     if (error) {
@@ -322,7 +322,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
         if ($(this).attr('id') == 'btn_finalize_transaction') {
             wallet.executeTransaction.estimateGas({from: web3.eth.accounts[0]}, function(error, result) {
                 if (error || result > 3000000) {
-                    alert("Error.\n-You must be an active user of this wallet\n-The waiting time of the user who initiated the transaction must have passed before it can be finalized");
+                    alert("Error.\n-You must be an active user of this wallet\n-The delay time of the user who initiated the transaction must have passed before it can be finalized");
                 } else {
                     wallet.executeTransaction({from: web3.eth.accounts[0]}, function(error, result) {
                         if (error) {
@@ -336,7 +336,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
         } else if ($(this).attr('id') == 'btn_cancel_transaction') {
             wallet.cancelTransaction.estimateGas({from: web3.eth.accounts[0]}, function(error, result) {
                 if (error || result > 3000000) {
-                    alert("Error.\n-You must be an active user of this wallet\n-Your waiting time must be lower than or equal to the waiting time of the transaction initiator");
+                    alert("Error.\n-You must be an active user of this wallet\n-Your delay time must be lower than or equal to the delay time of the transaction initiator");
                 } else {
                     wallet.cancelTransaction({from: web3.eth.accounts[0]}, function(error, result) {
                         if (error) {
@@ -354,7 +354,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
         var user_address = $(this).attr('address');
         wallet.removeUser.estimateGas(user_address, {from: web3.eth.accounts[0]}, function(error, result) {
             if (error || result > 3000000) {
-                alert("Error.\n-You must be an active user of this wallet\n-The user you are trying to remove must have a higher waiting time time than you");
+                alert("Error.\n-You must be an active user of this wallet\n-The user you are trying to remove must have a higher delay time time than you");
             } else {
                 wallet.removeUser(user_address, {from: web3.eth.accounts[0]}, function(error, result) {
                     if (error) {
