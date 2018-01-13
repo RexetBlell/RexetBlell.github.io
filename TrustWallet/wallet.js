@@ -46,7 +46,7 @@ var constructTransaction = function(tx, initiator, cur_user) {
 
     var list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Destination</h4> <p class="list-group-item-text">' + tx.destination + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Value</h4> <p class="list-group-item-text">' + web3.fromWei(tx.value, "ether") + ' ETH</p></div>';
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Data</h4> <p class="list-group-item-text">' + tx.data + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Data</h4> <textarea class="form-control" style="overflow:auto;resize:none" readonly="readonly">' + tx.data + '</textarea></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Initiated By</h4> <p class="list-group-item-text">' + tx.initiated_by + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Date Initiated</h4> <p class="list-group-item-text">' + moment.unix(tx.time_initiated).format(date_format) + '</p></div>';
     if (tx.time_finalized != 0) {

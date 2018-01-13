@@ -13,7 +13,7 @@ var show_transaction_created = function(tx_hash) {
     } else if (window.netId == 3) {
         link = '<a href="https://ropsten.etherscan.io/tx/' + tx_hash + '">' + tx_hash + '</a>';
     }
-    show_message("<p>Transaction Sent",
+    show_message("<p>Transaction Sent</p>",
       "This might take a few minutes depending on the network conditions and the gas price you set. Transaction: " + link + "</p>");
 }
 
