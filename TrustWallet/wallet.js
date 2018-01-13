@@ -23,7 +23,7 @@ var constructTransactionObject = function(tx_id, transactionContent) {
     return result;
 }
 
-var constructTransaction = function(tx, initiator) {
+var constructTransaction = function(tx, initiator, cur_user) {
     var title;
     var tx_status;
     var panel_status;
@@ -54,9 +54,7 @@ var constructTransaction = function(tx, initiator) {
         list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">' + tx_status + ' By</h4> <p class="list-group-item-text">' + tx.finalized_by + '</p></div>';
     } else {
         var time_until = Math.round(Math.max(0, tx.time_initiated - (Date.now() / 1000) + initiator.delay));
-        if (time_until == 0) {
-            list_items += '<div class="list-group-item list-group-item-success"> <p class="list-group-item-text">Can be executed now</p></div>';
-        } else {
+        if (time_until != 0) {
             var when_execute_str = "Can be executed " + moment.unix(tx.time_initiated + initiator.delay).format(date_format) + " (In around " + moment.duration(time_until, "seconds").humanize() + ")";
             list_items += '<div class="list-group-item list-group-item-danger"> <p class="list-group-item-text">' + when_execute_str + '</p></div>';
         }
@@ -102,11 +100,11 @@ var constructUserHtml = function(obj, state) {
     }
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Date Added</h4> <p class="list-group-item-text">' + moment.unix(obj.time_added).format(date_format) + '</p></div>';
     if (obj.time_removed == 0) {
-        var time_until = Math.round(Math.max(0, obj.time_added - (Date.now() / 1000) + obj.delay));
-        if (time_until == 0) {
-            list_items += '<div class="list-group-item list-group-item-success"> <p class="list-group-item-text">Can add another user now</p></div>';
-        } else {
-            list_items += '<div class="list-group-item list-group-item-danger"> <p class="list-group-item-text">Can add another user in around ' + moment.duration(time_until, "seconds").humanize() + '</p></div>';
+        if (state == "cur_user") {
+            var time_until = Math.round(Math.max(0, obj.time_added - (Date.now() / 1000) + obj.delay));
+            if (time_until != 0) {
+                list_items += '<div class="list-group-item list-group-item-danger"> <p class="list-group-item-text">Can add another user in around ' + moment.duration(time_until, "seconds").humanize() + '</p></div>';
+            }
         }
     } else {
         list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Removed By</h4> <p class="list-group-item-text">' + obj.removed_by + '</p></div>';
@@ -336,7 +334,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
         } else if ($(this).attr('id') == 'btn_cancel_transaction') {
             wallet.cancelTransaction.estimateGas({from: web3.eth.accounts[0]}, function(error, result) {
                 if (error || result > 3000000) {
-                    alert("Error.\n-You must be an active user of this wallet\n-Your delay time must be lower than or equal to the delay time of the transaction initiator");
+                    alert("Error.\n-You must be an active user of this wallet\nOne of the following needs to be true:\n-Your delay time must be lower than or equal to the delay time of the transaction initiator\n-The transaction has been pending for at least 2 times as long as your delay");
                 } else {
                     wallet.cancelTransaction({from: web3.eth.accounts[0]}, function(error, result) {
                         if (error) {

@@ -3,7 +3,7 @@ var constructWallet = function(web3, wallet_info_obj) {
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Created</h4> <p class="list-group-item-text">' +
         moment.unix(wallet_info_obj.time_created).format(date_format) + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Balance</h4> <p class="list-group-item-text">' + web3.fromWei(wallet_info_obj.balance, "ether") + ' ETH</p></div>';
-    var button = '<a href="wallet.html?wallet_address=' + wallet_info_obj.address + '" type="button" class="btn btn-default">View Wallet</a>';
+    var button = '<a href="wallet.html?wallet_address=' + wallet_info_obj.address + '" type="button" class="btn btn-primary">View Wallet</a>';
     return '<div class="panel panel-primary"> <div class="panel-body"> <div class="list-group">' + list_items + '</div>' + button + '</div> </div>';
 }
 
