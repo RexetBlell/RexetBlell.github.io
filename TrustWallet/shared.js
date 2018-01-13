@@ -20,7 +20,7 @@ var show_transaction_created = function(tx_hash) {
 var constructUserObject = function(address, userContent) {
     var obj = {
         address: address,
-        waiting_time: userContent[0].toNumber(),
+        delay: userContent[0].toNumber(),
         added_by: userContent[1],
         time_added: userContent[2].toNumber(),
         removed_by: userContent[3],

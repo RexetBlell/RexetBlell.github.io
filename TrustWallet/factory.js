@@ -63,7 +63,7 @@ var startApp = function(web3) {
         if (window.netId == 1) {
             window.location.href = "https://etherscan.io/address/0xaf98a2bc242d93b5206b2ea7cf26e31d82c5873b";
         } else if (window.netId == 3) {
-            window.location.href = "https://ropsten.etherscan.io/address/0x3287b89f553f903da1a0ec67e5eb184b5f4bc53b";
+            window.location.href = "https://ropsten.etherscan.io/address/0x5ee318f3629c83a521527835eec226254b5fb892";
         } else {
             alert("You must be on Main Net or Ropsten.");
         }

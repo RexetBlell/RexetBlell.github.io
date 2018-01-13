@@ -18,7 +18,6 @@ var constructTransactionObject = function(tx_id, transactionContent) {
         finalized_by: transactionContent[5],
         time_finalized: transactionContent[6].toNumber(),
         is_executed: transactionContent[7],
-        execution_successful: transactionContent[8],
         tx_id: tx_id
     }
     return result;
@@ -53,17 +52,12 @@ var constructTransaction = function(tx, initiator) {
     if (tx.time_finalized != 0) {
         list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Date ' + tx_status + '</h4> <p class="list-group-item-text">' + moment.unix(tx.time_finalized).format(date_format) + '</p></div>';
         list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">' + tx_status + ' By</h4> <p class="list-group-item-text">' + tx.finalized_by + '</p></div>';
-        if (tx.is_executed) {
-            var panel_color = "list-group-item-danger";
-            if (tx.execution_successful) panel_color = "list-group-item-success";
-            list_items += '<div class="list-group-item ' + panel_color + '"> <h4 class="list-group-item-heading">Execution Successful</h4> <p class="list-group-item-text">' + tx.execution_successful + '</p></div>';
-        }
     } else {
-        var time_until = Math.round(Math.max(0, tx.time_initiated - (Date.now() / 1000) + initiator.waiting_time));
+        var time_until = Math.round(Math.max(0, tx.time_initiated - (Date.now() / 1000) + initiator.delay));
         if (time_until == 0) {
             list_items += '<div class="list-group-item list-group-item-success"> <p class="list-group-item-text">Can be executed now</p></div>';
         } else {
-            var when_execute_str = "Can be executed " + moment.unix(tx.time_initiated + initiator.waiting_time).format(date_format) + " (In around " + moment.duration(time_until, "seconds").humanize() + ")";
+            var when_execute_str = "Can be executed " + moment.unix(tx.time_initiated + initiator.delay).format(date_format) + " (In around " + moment.duration(time_until, "seconds").humanize() + ")";
             list_items += '<div class="list-group-item list-group-item-danger"> <p class="list-group-item-text">' + when_execute_str + '</p></div>';
         }
         buttons += '<div class="btn-group">';
@@ -86,11 +80,11 @@ var constructUserHtml = function(obj, state) {
         }
     }
 
-    var waiting_time_str;
-    if (obj.waiting_time < 60) {
-        waiting_time_str = obj.waiting_time + " seconds";
+    var delay_str;
+    if (obj.delay < 60) {
+        delay_str = obj.delay + " seconds";
     } else {
-        waiting_time_str = 'Around ' + moment.duration(obj.waiting_time, "seconds").humanize();
+        delay_str = 'Around ' + moment.duration(obj.delay, "seconds").humanize();
     }
     var list_items = '';
     if (state == "cur_user") {
@@ -100,7 +94,7 @@ var constructUserHtml = function(obj, state) {
             list_items += '<div class="list-group-item list-group-item-danger"> <h4 class="list-group-item-heading">Status</h4> <p class="list-group-item-text">Removed</p></div>';
         }
     }
-    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Waiting Time</h4> <p class="list-group-item-text">' + waiting_time_str + '</p></div>';
+    list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Waiting Time</h4> <p class="list-group-item-text">' + delay_str + '</p></div>';
     if (obj.added_by == "0x0000000000000000000000000000000000000000") {
         list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Added By</h4> <p class="list-group-item-text">Nobody (original wallet creator) </p></div>';
     } else {
@@ -108,7 +102,7 @@ var constructUserHtml = function(obj, state) {
     }
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Date Added</h4> <p class="list-group-item-text">' + moment.unix(obj.time_added).format(date_format) + '</p></div>';
     if (obj.time_removed == 0) {
-        var time_until = Math.round(Math.max(0, obj.time_added - (Date.now() / 1000) + obj.waiting_time));
+        var time_until = Math.round(Math.max(0, obj.time_added - (Date.now() / 1000) + obj.delay));
         if (time_until == 0) {
             list_items += '<div class="list-group-item list-group-item-success"> <p class="list-group-item-text">Can add another user now</p></div>';
         } else {
@@ -183,7 +177,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
     }
 
     var compare_users = function(a, b) {
-        return a.waiting_time - b.waiting_time;
+        return a.delay - b.delay;
     }
 
     var refreshUsers = function(index, users, fn) {
@@ -228,7 +222,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
                     panel_current_user_new_content += constructUserHtml(users[i], "cur_user");
                 } else if (users[i].time_removed > 0) {
                     panel_removed_users_new_content += constructUserHtml(users[i]);
-                } else if (users[i].waiting_time < cur_user.waiting_time) {
+                } else if (users[i].delay < cur_user.delay) {
                     panel_users_new_content += constructUserHtml(users[i], "stronger");
                 } else {
                     panel_users_new_content += constructUserHtml(users[i], "weaker");
@@ -293,30 +287,30 @@ var continueLoading = function(web3, wallet_address, wallet) {
             return;
         }
         var mult = 1;
-        if ($("#inp_waiting_time_units" ).val() == "minutes") {
+        if ($("#inp_delay_units" ).val() == "minutes") {
             mult = 60;
-        } else if ($("#inp_waiting_time_units" ).val() == "hours") {
+        } else if ($("#inp_delay_units" ).val() == "hours") {
             mult = 3600;
-        } else if ($("#inp_waiting_time_units" ).val() == "days") {
+        } else if ($("#inp_delay_units" ).val() == "days") {
             mult = 3600 * 24;
-        } else if ($("#inp_waiting_time_units" ).val() == "weeks") {
+        } else if ($("#inp_delay_units" ).val() == "weeks") {
             mult = 3600 * 24 * 7;
-        } else if ($("#inp_waiting_time_units" ).val() == "months") {
+        } else if ($("#inp_delay_units" ).val() == "months") {
             mult = 3600 * 24 * 30;
-        } else if ($("#inp_waiting_time_units" ).val() == "years") {
+        } else if ($("#inp_delay_units" ).val() == "years") {
             mult = 3600 * 24 * 365;
         }
-        var waiting_time = $("#inp_new_user_waiting_time").val() * mult;
-        wallet.addUser.estimateGas(user_address, waiting_time, {from: web3.eth.accounts[0]}, function(error, result) {
+        var delay = $("#inp_new_user_delay").val() * mult;
+        wallet.addUser.estimateGas(user_address, delay, {from: web3.eth.accounts[0]}, function(error, result) {
             if (error || result > 3000000) {
                 alert("Error.\n-You must be an active user of this wallet\n-Your waiting time must have passed since you added another user or since you were added to this wallet\n-The user you are trying to add must not already exist\n-The user you are trying to add must not have been removed\n-The waiting time of the user you are trying to add must be higher than or equal to your waiting time");
             } else {
-                wallet.addUser(user_address, waiting_time, {from: web3.eth.accounts[0]}, function(error, result) {
+                wallet.addUser(user_address, delay, {from: web3.eth.accounts[0]}, function(error, result) {
                     if (error) {
                         alert("Error: " + error);
                     } else {
                         show_transaction_created(result);
-                        $("#inp_new_user_waiting_time").val("");
+                        $("#inp_new_user_delay").val("");
                         $("#inp_new_user_address").val("");
                     }
                 });
