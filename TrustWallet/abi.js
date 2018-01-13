@@ -34,14 +34,14 @@ var getTrustWalletFactory = function(web3, fn) {
     }];
 
 
-    var ropsten_address = "0x5ee318f3629c83a521527835eec226254b5fb892";
+    var ropsten_address = "0x8948075ce42e656a83f76b9a3d0b53e8dc5c7a66";
     var mainnet_address = "0xaf98a2bc242d93b5206b2ea7cf26e31d82c5873b";
     var abstract_contract = web3.eth.contract(contractABI);
 
     if (window.netId == 1) {
         // Main Net
         web3.eth.getCode(mainnet_address, function(error, result) {
-            if (!error && result.length == 8640) {
+            if (!error && result.length == 8344) {
                 var specific_contract = abstract_contract.at(mainnet_address);
                 fn(null, specific_contract);
             } else {
@@ -51,7 +51,7 @@ var getTrustWalletFactory = function(web3, fn) {
     } else if (window.netId == 3) {
         // Ropsten
         web3.eth.getCode(ropsten_address, function(error, result) {
-            if (!error && result.length == 8640) {
+            if (!error && result.length == 8344) {
                 var specific_contract = abstract_contract.at(ropsten_address);
                 fn(null, specific_contract);
             } else {
@@ -227,34 +227,6 @@ var getTrustWallet = function(web3, address, fn) {
 		"type": "function"
 	},
 	{
-		"constant": true,
-		"inputs": [],
-		"name": "balance",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "transactionCount",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
 		"constant": false,
 		"inputs": [
 			{
@@ -270,20 +242,6 @@ var getTrustWallet = function(web3, address, fn) {
 		"outputs": [],
 		"payable": false,
 		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "isTransactionPending",
-		"outputs": [
-			{
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -308,7 +266,7 @@ var getTrustWallet = function(web3, address, fn) {
         fn("Address Invalid: " + address, null);
     } else {
         web3.eth.getCode(address, function(error, result) {
-            if (!error && result.length == 6904) {
+            if (!error && result.length == 6608) {
                 var specific_contract = abstract_contract.at(address);
                 fn(null, specific_contract);
             } else {

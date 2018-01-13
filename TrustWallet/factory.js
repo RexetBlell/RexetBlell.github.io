@@ -46,7 +46,7 @@ var addWallet = function(index, trustWalletFactory, wallets, fn) {
                 } else {
                     wallet_info_obj.address = wallet_address;
                     wallet = result;
-                    wallet.balance(handleBalance)
+                    web3.eth.getBalance(wallet.address, handleBalance);
                 }
             });
         }
@@ -63,7 +63,7 @@ var startApp = function(web3) {
         if (window.netId == 1) {
             window.location.href = "https://etherscan.io/address/0xaf98a2bc242d93b5206b2ea7cf26e31d82c5873b";
         } else if (window.netId == 3) {
-            window.location.href = "https://ropsten.etherscan.io/address/0x5ee318f3629c83a521527835eec226254b5fb892";
+            window.location.href = "https://ropsten.etherscan.io/address/0x8948075ce42e656a83f76b9a3d0b53e8dc5c7a66";
         } else {
             alert("You must be on Main Net or Ropsten.");
         }

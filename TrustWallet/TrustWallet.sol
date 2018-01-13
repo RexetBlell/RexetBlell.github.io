@@ -54,20 +54,10 @@ contract TrustWallet {
     }
 
     // Returns true if there is a transaction pending.
-    function isTransactionPending() public constant returns (bool) {
+    function isTransactionPending() internal constant returns (bool) {
         if (transactions.length == 0) return false;
         return transactions[transactions.length - 1].time_initiated > 0 &&
             transactions[transactions.length - 1].time_finalized == 0;
-    }
-
-    // Returns the balance of this contract.
-    function balance() public constant returns (uint) {
-        return address(this).balance;
-    }
-
-    // Returns the balance of this contract.
-    function transactionCount() public constant returns (uint) {
-        return transactions.length;
     }
 
     // Constructor. Creates the first user.
@@ -127,7 +117,6 @@ contract TrustWallet {
         onlyActiveUsersAllowed()
         transactionMustBePending()
     {
-        // Users with a higher priority can do this
         Transaction storage transaction = transactions[transactions.length - 1];
         // Either the sender is a higher priority user, or twice the waiting time of
         // the user trying to cancel has passed. This is to prevent transactions from
@@ -173,8 +162,8 @@ contract TrustWallet {
         public
         onlyActiveUsersAllowed()
     {
-        require(users[userAddr].time_removed == 0);
         require(users[userAddr].time_added != 0);
+        require(users[userAddr].time_removed == 0);
 
         User storage sender = users[msg.sender]; 
         require(sender.delay <= users[userAddr].delay);

@@ -245,7 +245,7 @@ var continueLoading = function(web3, wallet_address, wallet) {
 
         var target_text = "Wallet Address: " + wallet_address;
         if ($("#out_wallet_address").text() != target_text) $("#out_wallet_address").text(target_text);
-        wallet.balance(function(error, result) {
+        web3.eth.getBalance(wallet.address, function(error, result) {
             var target_text = "Balance: " + web3.fromWei(result, 'ether') + " ETH";
             if ($("#out_balance").text() != target_text) $("#out_balance").text(target_text);
         });
