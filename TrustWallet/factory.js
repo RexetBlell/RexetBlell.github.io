@@ -55,13 +55,17 @@ var addWallet = function(index, trustWalletFactory, wallets, fn) {
 
 var startApp = function(web3) {
 
+    if (web3.eth.accounts.length == 0) {
+        alert("Your MetaMask appears to be locked. Unlock your MetaMask and refresh the page");
+    }
+
     $("#btn_find_wallet").click(function() {
         window.location.href = "wallet.html?wallet_address=" + $("#inp_wallet_address").val();
     });
 
     $("#btn_etherscan").click(function() {
         if (window.netId == 1) {
-            window.location.href = "https://etherscan.io/address/0xaf98a2bc242d93b5206b2ea7cf26e31d82c5873b";
+            window.location.href = "https://etherscan.io/address/0x903db1bf91cc22964cccfbe1a1875eb3b989f32a";
         } else if (window.netId == 3) {
             window.location.href = "https://ropsten.etherscan.io/address/0x8948075ce42e656a83f76b9a3d0b53e8dc5c7a66";
         } else {

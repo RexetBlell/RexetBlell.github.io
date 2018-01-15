@@ -35,7 +35,7 @@ var getTrustWalletFactory = function(web3, fn) {
 
 
     var ropsten_address = "0x8948075ce42e656a83f76b9a3d0b53e8dc5c7a66";
-    var mainnet_address = "0xaf98a2bc242d93b5206b2ea7cf26e31d82c5873b";
+    var mainnet_address = "0x903db1bf91cc22964cccfbe1a1875eb3b989f32a";
     var abstract_contract = web3.eth.contract(contractABI);
 
     if (window.netId == 1) {
@@ -266,6 +266,7 @@ var getTrustWallet = function(web3, address, fn) {
         fn("Address Invalid: " + address, null);
     } else {
         web3.eth.getCode(address, function(error, result) {
+            alert(result.length);
             if (!error && result.length == 6608) {
                 var specific_contract = abstract_contract.at(address);
                 fn(null, specific_contract);
