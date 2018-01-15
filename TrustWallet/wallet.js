@@ -390,10 +390,6 @@ var continueLoading = function(web3, wallet_address, wallet) {
 
 var startApp = function(web3) {
 
-    if (web3.eth.accounts.length == 0) {
-        alert("Your MetaMask appears to be locked. Unlock your MetaMask and refresh the page");
-    }
-
     $("#btn_find_wallet").click(function() {
         window.location.href = "wallet.html?wallet_address=" + $("#inp_wallet_address").val();
     });

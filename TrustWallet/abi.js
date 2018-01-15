@@ -266,7 +266,6 @@ var getTrustWallet = function(web3, address, fn) {
         fn("Address Invalid: " + address, null);
     } else {
         web3.eth.getCode(address, function(error, result) {
-            alert(result.length);
             if (!error && result.length == 6608) {
                 var specific_contract = abstract_contract.at(address);
                 fn(null, specific_contract);
