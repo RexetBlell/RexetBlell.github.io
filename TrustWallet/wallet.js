@@ -53,7 +53,7 @@ var constructTransaction = function(tx, initiator, cur_user) {
         list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Date ' + tx_status + '</h4> <p class="list-group-item-text">' + moment.unix(tx.time_finalized).format(date_format) + '</p></div>';
         list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">' + tx_status + ' By</h4> <p class="list-group-item-text">' + tx.finalized_by + '</p></div>';
     } else {
-        var time_until = Math.round(Math.max(0, tx.time_initiated - (Date.now() / 1000) + initiator.delay));
+        var time_until = Math.round(Math.max(0, tx.time_initiated + Math.min(30, initiator.delay) - (Date.now() / 1000) + initiator.delay));
         if (time_until != 0) {
             var when_execute_str = "Can be executed " + moment.unix(tx.time_initiated + initiator.delay).format(date_format) + " (In around " + moment.duration(time_until, "seconds").humanize() + ")";
             list_items += '<div class="list-group-item list-group-item-warning"> <p class="list-group-item-text">' + when_execute_str + '</p></div>';
@@ -101,7 +101,7 @@ var constructUserHtml = function(obj, state) {
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Date Added</h4> <p class="list-group-item-text">' + moment.unix(obj.time_added).format(date_format) + '</p></div>';
     if (obj.time_removed == 0) {
         if (state == "cur_user") {
-            var time_until = Math.round(Math.max(0, obj.time_added - (Date.now() / 1000) + obj.delay));
+            var time_until = Math.round(Math.max(0, obj.time_added_another_user + Math.min(30, obj.delay) - (Date.now() / 1000) + obj.delay));
             if (time_until != 0) {
                 list_items += '<div class="list-group-item list-group-item-danger"> <p class="list-group-item-text">Can add another user in around ' + moment.duration(time_until, "seconds").humanize() + '</p></div>';
             }
@@ -389,10 +389,6 @@ var continueLoading = function(web3, wallet_address, wallet) {
 }
 
 var startApp = function(web3) {
-
-    $("#btn_find_wallet").click(function() {
-        window.location.href = "wallet.html?wallet_address=" + $("#inp_wallet_address").val();
-    });
 
     web3.version.getNetwork(function(error, netId) {
         if (error) {

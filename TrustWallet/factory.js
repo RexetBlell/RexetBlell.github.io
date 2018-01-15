@@ -1,5 +1,5 @@
 var constructWallet = function(web3, wallet_info_obj) {
-    var list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Address</h4> <p class="list-group-item-text">' + wallet_info_obj.address + '</p></div>';
+    var list_items = '<div class="list-group-item"> <h4 class="list-group-item-heading">Wallet Address</h4> <p class="list-group-item-text">' + wallet_info_obj.address + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Time Created</h4> <p class="list-group-item-text">' +
         moment.unix(wallet_info_obj.time_created).format(date_format) + '</p></div>';
     list_items += '<div class="list-group-item"> <h4 class="list-group-item-heading">Balance</h4> <p class="list-group-item-text">' + web3.fromWei(wallet_info_obj.balance, "ether") + ' ETH</p></div>';
@@ -55,10 +55,6 @@ var addWallet = function(index, trustWalletFactory, wallets, fn) {
 
 var startApp = function(web3) {
 
-    $("#btn_find_wallet").click(function() {
-        window.location.href = "wallet.html?wallet_address=" + $("#inp_wallet_address").val();
-    });
-
     $("#btn_etherscan").click(function() {
         if (window.netId == 1) {
             window.location.href = "https://etherscan.io/address/0x903db1bf91cc22964cccfbe1a1875eb3b989f32a";
@@ -100,7 +96,7 @@ var startApp = function(web3) {
                             }
                         });
 
-                        var target_text = "Wallets created by " + web3.eth.accounts[0];
+                        var target_text = "Wallets created by your address (" + web3.eth.accounts[0] + ")";
                         if ($("#panel_wallets_title").text() != target_text) {
                             $("#panel_wallets_title").text(target_text);
                         }
@@ -109,7 +105,7 @@ var startApp = function(web3) {
                                 address_list = result;
                                 $("#panel_wallets").empty();
                                 if (address_list.length == 0) {
-                                    $("#panel_wallets").append("<h4>No wallets were created by this address</h4><p>Start by creating a new wallet, or finding a link to an existing one.</p>");
+                                    $("#panel_wallets").append("<h4>Looks like you did not create any wallets yet</h4><p>Start by creating a new wallet.</p>");
                                 } else {
                                     for (var i = 0; i < address_list.length; i++) {
                                         $("#panel_wallets").append(constructWallet(web3, address_list[i]));

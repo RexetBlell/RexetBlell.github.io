@@ -78,15 +78,15 @@
             <div class="panel-body">
               <form>
                 <div class="form-group">
-                  <label for="inp_destination">Destination</label>
-                  <input type="text" class="form-control" id="inp_destination" placeholder="Destination">
+                  <label for="inp_destination">To Address</label>
+                  <input type="text" class="form-control" id="inp_destination" placeholder="Destination Address" data-toggle="tooltip" data-placement="bottom" title="The address of the recipient.">
                 </div>
                 <div class="form-group">
-                  <label for="inp_value">Value</label>
-                  <input type="text" class="form-control" id="inp_value" placeholder="Value (ETH)" data-toggle="tooltip" data-placement="bottom" title="The amount of Ether you want to send from this wallet to the destination.">
+                  <label for="inp_value">Amount to Send</label>
+                  <input type="text" class="form-control" id="inp_value" placeholder="Amount of ETH" data-toggle="tooltip" data-placement="bottom" title="The amount of Ether you want to send from this wallet to the destination.">
                 </div>
                 <div class="form-group">
-                  <label for="inp_data">Data</label>
+                  <label for="inp_data">Data (Advanced)</label>
                   <textarea class="form-control" rows="3" id="inp_data" placeholder="Data" data-toggle="tooltip" title="You should leave this blank unless you are an advanced user. This field allows this transaction to be a contract call."></textarea>
                 </div>
                 <button type="button" class="btn btn-default" id="btn_initiate_transaction">Initiate Transaction</button>
