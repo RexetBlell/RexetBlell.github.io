@@ -56,7 +56,7 @@ var constructTransaction = function(tx, initiator, cur_user) {
         var time_until = Math.round(Math.max(0, tx.time_initiated - (Date.now() / 1000) + initiator.delay));
         if (time_until != 0) {
             var when_execute_str = "Can be executed " + moment.unix(tx.time_initiated + initiator.delay).format(date_format) + " (In around " + moment.duration(time_until, "seconds").humanize() + ")";
-            list_items += '<div class="list-group-item list-group-item-danger"> <p class="list-group-item-text">' + when_execute_str + '</p></div>';
+            list_items += '<div class="list-group-item list-group-item-warning"> <p class="list-group-item-text">' + when_execute_str + '</p></div>';
         }
         buttons += '<div class="btn-group">';
         buttons += '<button type="button" class="btn btn-default" id="btn_finalize_transaction">Execute Transaction</button>';
